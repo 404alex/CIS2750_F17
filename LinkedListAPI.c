@@ -126,4 +126,21 @@ void *getFromBack(List *list) {
     return list->tail;
 }
 
+char *toString(List list) {
+    listVerification(&list);
+    void *elem;
+    ListIterator iter = createIterator(list);
+    char *string = malloc(sizeof(char) * 2);
+    strcpy(string, "");
+    int size = 2;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *str = list.printData(elem);
+        size += (strlen(str) + 2);
+        string = realloc(string, sizeof(char *) * size);
+        strcat(string, str);
+        free(str);
+        strcat(string, "\n");
+    }
+    return string;
+}
 

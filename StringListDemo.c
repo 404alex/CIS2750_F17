@@ -28,30 +28,27 @@ int main(void) {
     //Allocate the strings
     char *str[4];
 
-    for (int i = 0; i < 4; i++) {
-        str[i] = (char *) malloc(10 * sizeof(char));
-    }
-    strcpy(str[0], "Hello");
-    strcpy(str[1], " ");
-    strcpy(str[2], "world");
-    strcpy(str[3], "!");
-    //free(str[0]);
-    free(str[1]);
-    free(str[2]);
-    free(str[3]);
+//    for (int i = 0; i < 4; i++) {
+//        str[i] = (char *) malloc(10 * sizeof(char));
+//    }
+//    strcpy(str[0], "Hello");
+//    strcpy(str[1], " ");
+//    strcpy(str[2], "world");
+//    strcpy(str[3], "!");
+
 
     /*
     Create the list.  The list is allocated on the stack, and initializeList returns the list struct.
     */
     List list = initializeList(&printFunc, &deleteFunc, &compareFunc);
 
-    //Populate the list
+//    //Populate the list
 //	for (int i = 0; i < 4; i++){
 //		insertBack(&list, (void*)str[i]);
 //	}
 
-    insertBack(&list, (void *) str[0]);
     void *elem;
+
 
     //Create an iterator - again, the iterator is allocated on the stack
     ListIterator iter = createIterator(list);
@@ -72,6 +69,10 @@ int main(void) {
     Crear list contents - free each node, including its contents
     Since the list is created in the stack, we don't need to free it.
     */
+    char *string = toString(list);
+    printf("%s\n", string);
+    free(string);
+
     clearList(&list);
 
     return 0;
