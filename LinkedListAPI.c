@@ -144,3 +144,43 @@ char *toString(List list) {
     return string;
 }
 
+//TODO need make sure what need to be returned.
+void *deleteDataFromList(List *list, void *toBeDeleted) {
+    listVerification(list);
+    if (list->head == NULL && list->tail == NULL) {
+        return NULL;
+    }
+    void *elem;
+    ListIterator iter = createIterator(*list);
+    while ((elem = nextElement(&iter)) != NULL) {
+        if (list->compare(toBeDeleted, elem) == 0) {
+            if (list->head == list->tail) {
+                list->deleteData(list->head->data);
+                free(list->head);
+                list->head = NULL;
+                list->tail = NULL;
+                break;
+            } else if (iter.current->next == NULL) {
+                list->tail = list->tail->previous;
+                list->deleteData(list->tail->next->data);
+                free(list->tail->next);
+                list->tail->next = NULL;
+                break;
+            } else if (iter.current->previous == NULL) {
+                list->head = list->head->next;
+                list->deleteData(list->head->previous->data);
+                free(list->head->previous);
+                list->head->previous = NULL;
+                break;
+            } else {
+                list->deleteData(iter.current->data);
+                iter.current->previous->next = iter.current->next;
+                iter.current->next->previous = iter.current->previous;
+                free(iter.current);
+                break;
+            }
+        }
+    }
+}
+
+
