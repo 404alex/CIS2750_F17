@@ -18,9 +18,9 @@
  * of it, as well as the node immediately behind it.
  **/
 typedef struct listNode{
-    void *data;
-    struct listNode *previous;
-    struct listNode *next;
+    void* data;
+    struct listNode* previous;
+    struct listNode* next;
 } Node;
 
 /**
@@ -30,11 +30,11 @@ typedef struct listNode{
  * for working with the abstracted list data.
  **/
 typedef struct listHead{
-    Node *head;
-    Node *tail;
-    void (*deleteData)(void *toBeDeleted);
-    int (*compare)(const void *first,const void *second);
-    char* (*printData)(void *toBePrinted);
+    Node* head;
+    Node* tail;
+    void (*deleteData)(void* toBeDeleted);
+    int (*compare)(const void* first,const void* second);
+    char* (*printData)(void* toBePrinted);
 } List;
 
 
@@ -54,7 +54,7 @@ typedef struct iter{
 *@param deleteFunction function pointer to delete a single piece of data from the list
 *@param compareFunction function pointer to compare two nodes of the list in order to test for equality or order
 **/
-List initializeList(char* (*printFunction)(void *toBePrinted),void (*deleteFunction)(void *toBeDeleted),int (*compareFunction)(const void *first,const void *second));
+List initializeList(char* (*printFunction)(void* toBePrinted),void (*deleteFunction)(void* toBeDeleted),int (*compareFunction)(const void* first,const void* second));
 
 
 
@@ -67,7 +67,7 @@ List initializeList(char* (*printFunction)(void *toBePrinted),void (*deleteFunct
 *@return On success returns a node that can be added to a linked list. On failure, returns NULL.
 *@param data - is a void * pointer to any data type.  Data must be allocated on the heap.
 **/
-Node *initializeNode(void *data);
+Node* initializeNode(void* data);
 
 
 
@@ -77,7 +77,7 @@ Node *initializeNode(void *data);
 *@param list pointer to the dummy head of the list
 *@param toBeAdded a pointer to data that is to be added to the linked list
 **/
-void insertFront(List *list, void *toBeAdded);
+void insertFront(List* list, void* toBeAdded);
 
 
 
@@ -87,7 +87,7 @@ void insertFront(List *list, void *toBeAdded);
 *@param list pointer to the dummy head of the list
 *@param toBeAdded a pointer to data that is to be added to the linked list
 **/
-void insertBack(List *list, void *toBeAdded);
+void insertBack(List* list, void* toBeAdded);
 
 
 
@@ -96,7 +96,7 @@ void insertBack(List *list, void *toBeAdded);
 *@pre 'List' type must exist and be used in order to keep track of the linked list.
 *@param list pointer to the List-type dummy node
 **/
-void clearList(List *list);
+void clearList(List* list);
 
 
 /** Uses the comparison function pointer to place the element in the 
@@ -108,39 +108,39 @@ void clearList(List *list);
 as a pointer to the first and last element of the list.
 *@param toBeAdded a pointer to data that is to be added to the linked list
 **/
-//todo insert sorted
-void insertSorted(List *list, void *toBeAdded);
+void insertSorted(List* list, void* toBeAdded);
 
 
 
 /** Removes data from from the list, deletes the node and frees the memory,
  * changes pointer values of surrounding nodes to maintain list structure.
  * returns the data 
+ * You can assume that the list contains no duplicates
  *@pre List must exist and have memory allocated to it
  *@post toBeDeleted will have its memory freed if it exists in the list.
  *@param list pointer to the dummy head of the list containing deleteFunction function pointer
  *@param toBeDeleted pointer to data that is to be removed from the list
  *@return on success: void * pointer to data  on failure: NULL
  **/
-void* deleteDataFromList(List *list, void *toBeDeleted);
+void* deleteDataFromList(List* list, void* toBeDeleted);
 
 
 
 /**Returns a pointer to the data at the front of the list. Does not alter list structure.
  *@pre The list exists and has memory allocated to it
- *@param list pointer to the dummy head of the list containing the head of the list
+ *@param the list struct
  *@return pointer to the data located at the head of the list
  **/
-void* getFromFront(List *list);
+void* getFromFront(List list);
 
 
 
 /**Returns a pointer to the data at the back of the list. Does not alter list structure.
  *@pre The list exists and has memory allocated to it
- *@param list pointer to the dummy head of the list containing the tail of the list
+ *@param the list struct
  *@return pointer to the data located at the tail of the list
  **/
-void* getFromBack(List *list);
+void* getFromBack(List list);
 
 
 

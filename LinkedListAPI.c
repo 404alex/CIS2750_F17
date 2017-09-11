@@ -72,8 +72,7 @@ Node *initializeNode(void *data) {
 
 List initializeList(char *(*printFunction)(void *toBePrinted), void (*deleteFunction)(void *toBeDeleted),
                     int (*compareFunction)(const void *first, const void *second)) {
-    if(printFunction==NULL||deleteFunction==NULL||compareFunction==NULL)
-    {
+    if (printFunction == NULL || deleteFunction == NULL || compareFunction == NULL) {
         printf("Fatal error: Necessary Function Point is NULL. Terminating");
         exit(0);
     }
@@ -121,14 +120,14 @@ void clearList(List *list) {
 
 }
 
-void *getFromFront(List *list) {
-    listVerification(list);
-    return list->head;
+void *getFromFront(List list) {
+    listVerification(&list);
+    return list.head->data;
 }
 
-void *getFromBack(List *list) {
-    listVerification(list);
-    return list->tail;
+void *getFromBack(List list) {
+    listVerification(&list);
+    return list.tail->data;
 }
 
 char *toString(List list) {
