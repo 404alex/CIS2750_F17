@@ -4,14 +4,14 @@
 
 void listVerification(List *list) {
     if (list == NULL) {
-        printf("Fatal error, list not exists, exiting");
+        printf("Fatal error, list not exists, terminating");
         exit(0);
     }
 }
 
 void iterVerification(ListIterator *iter) {
     if (iter == NULL) {
-        printf("Fatal error, iterator not exits, exiting");
+        printf("Fatal error, iterator not exits, terminating");
         exit(0);
     }
 }
@@ -72,6 +72,11 @@ Node *initializeNode(void *data) {
 
 List initializeList(char *(*printFunction)(void *toBePrinted), void (*deleteFunction)(void *toBeDeleted),
                     int (*compareFunction)(const void *first, const void *second)) {
+    if(printFunction==NULL||deleteFunction==NULL||compareFunction==NULL)
+    {
+        printf("Fatal error: Necessary Function Point is NULL. Terminating");
+        exit(0);
+    }
     List list; //= malloc(sizeof(List));
     list.compare = compareFunction;
     list.deleteData = deleteFunction;

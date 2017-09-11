@@ -122,7 +122,6 @@ void insertSorted(List *list, void *toBeAdded);
  *@param toBeDeleted pointer to data that is to be removed from the list
  *@return on success: void * pointer to data  on failure: NULL
  **/
-//todo delete data from list
 void* deleteDataFromList(List *list, void *toBeDeleted);
 
 
@@ -152,7 +151,6 @@ returned string must be freed by the calling function.
  *@param list Pointer to linked list dummy head.
  *@return on success: char * to string representation of list (must be freed after use).  on failure: NULL
  **/
-//todo to string method.
 char* toString(List list);
 
 
