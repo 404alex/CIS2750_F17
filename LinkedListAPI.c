@@ -139,16 +139,15 @@ char *toString(List list) {
     int size = 2;
     while ((elem = nextElement(&iter)) != NULL) {
         char *str = list.printData(elem);
-        size += (strlen(str) + 2);
-        string = realloc(string, sizeof(char *) * size);
+        size += (strlen(str) + 4);
+        string = realloc(string, sizeof(char) * size);
         strcat(string, str);
         free(str);
-        strcat(string, "\n");
+        strcat(string, "; ");
     }
     return string;
 }
 
-//TODO need make sure what need to be returned.
 void *deleteDataFromList(List *list, void *toBeDeleted) {
     listVerification(list);
     if (list->head == NULL && list->tail == NULL) {
@@ -159,32 +158,36 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
     while ((elem = nextElement(&iter)) != NULL) {
         if (list->compare(toBeDeleted, elem) == 0) {
             if (list->head == list->tail) {
-                list->deleteData(list->head->data);
                 free(list->head);
                 list->head = NULL;
                 list->tail = NULL;
-                break;
+                void *data = list->head->data;
+                return data;
             } else if (iter.current->next == NULL) {
                 list->tail = list->tail->previous;
-                list->deleteData(list->tail->next->data);
                 free(list->tail->next);
                 list->tail->next = NULL;
-                break;
+                void *data = list->tail->next->data;
+                return data;
             } else if (iter.current->previous == NULL) {
                 list->head = list->head->next;
-                list->deleteData(list->head->previous->data);
                 free(list->head->previous);
                 list->head->previous = NULL;
-                break;
+                void *data = list->head->previous->data;
+                return data;
             } else {
-                list->deleteData(iter.current->data);
                 iter.current->previous->next = iter.current->next;
                 iter.current->next->previous = iter.current->previous;
                 free(iter.current);
-                break;
+                void *data = iter.current->data;
+                return data;
             }
         }
     }
 }
 
+
+void insertSorted(List *list, void *toBeAdded) {
+
+}
 
