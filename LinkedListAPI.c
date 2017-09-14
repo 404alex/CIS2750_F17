@@ -237,6 +237,12 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
 void insertSorted(List *list, void *toBeAdded) {
     //insert into a sorted list.
     //two situations: 1st, low to high sorted, 2nd, high to low sorted.
+    listVerification(list);
+    if (list->tail == NULL && list->head == NULL) {
+        Node *nodeAdded = initializeNode(toBeAdded);
+        list->tail = list->head = nodeAdded;
+        return;
+    }
     if (list->compare(list->head->data, list->tail->data) == 0) {
         insertBack(list, toBeAdded);
     } else if (list->compare(list->head->data, list->tail->data) > 0) {

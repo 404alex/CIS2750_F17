@@ -83,7 +83,7 @@ int main(void) {
     List list = initializeList(&printFunc, &deleteFunc, &compareFunc);
 
     //Populate the list
-    for (int i = 0; i < 12; i++) {
+    for (int i = 0; i < 4; i++) {
         tmpName = (Name *) malloc(sizeof(Name));
         tmpName->age = (i + 1) * 10;
 
@@ -97,7 +97,7 @@ int main(void) {
         tmpName->lastName = (char *) malloc(sizeof(char) * memLen);
         strcpy(tmpName->lastName, tmpStr);
 
-        insertBack(&list, (void *) tmpName);
+        insertSorted(&list, (void *) tmpName);
     }
 
     char *tmp = list.printData(getFromFront(list));
@@ -111,10 +111,10 @@ int main(void) {
 
     Name *data = (Name *) malloc(sizeof(Name));
     data->age = 15;
-    data->firstName = malloc(sizeof(char) * 6);
-    strcpy(data->firstName, "Name3");
+    data->firstName = malloc(sizeof(char) * 9);
+    strcpy(data->firstName, "Name**");
     data->lastName = malloc(sizeof(char) * 17);
-    strcpy(data->lastName, "Lastname0");
+    strcpy(data->lastName, "Lastname1");
 
     insertSorted(&list, data);
 
