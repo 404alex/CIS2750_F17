@@ -1,9 +1,7 @@
 /**
- * Course code: CIS*2750
- * Assignment number: 0
- * First name: Chenxingyu
- * Last name: Chen
- * Student ID: 0951136
+ * CIS2750 F2017
+ * Assignment 0
+ * Chenxingyu Chen 0951136
  * Description: This file is created by Chenxingyu Chen. This file implement the basic ADT link list function.
  * And some errors will cause the program terminated:
  * 1.operate the list when the list is NULL or empty.
@@ -14,7 +12,9 @@
  * 1. pass NULL point in the insertFront, insertBack and insertSorted function as toBeAdded will make the list skip
  * this data and not create the node.
  *
- * No content from other sources but the separate method '; ' comes from the in-class example.
+ * This implementation is based on the List API that I implemented in my Assignment 2 for CIS2520
+ * Which I took in the F2016 with professor Fangju Wang. The permission to use my CIS2520 code in CIS2750
+ * was obtained on my behalf by my current CIS2750 professor, Denis Nikitenko.
  */
 
 #include <stdio.h>
