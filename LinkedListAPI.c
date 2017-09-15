@@ -1,7 +1,20 @@
 /**
- * Created by Chenxingyu Chen
- * 2017-09-11
- * ID: 0951136
+ * Course code: CIS*2750
+ * Assignment number: 0
+ * First name: Chenxingyu
+ * Last name: Chen
+ * Student ID: 0951136
+ * Description: This file is created by Chenxingyu Chen. This file implement the basic ADT link list function.
+ * And some errors will cause the program terminated:
+ * 1.operate the list when the list is NULL or empty.
+ * 2.use the iterator when the iter is NULL.
+ * 3.pass NULL to the necessary function point.
+ *
+ * And some other errors will be handle like:
+ * 1. pass NULL point in the insertFront, insertBack and insertSorted function as toBeAdded will make the list skip
+ * this data and not create the node.
+ *
+ * No content from other sources but the separate method '; ' comes from the in-class example.
  */
 
 #include <stdio.h>
@@ -20,6 +33,11 @@ void listVerification(List *list) {
     }
 }
 
+/**
+ * verifiy wheather the head and tail point to a NULL.
+ * if the head or tail is NULL, terminate the program.
+ * @param list pointer of the list.
+ */
 void headTailVerification(List *list) {
     if (list->head == NULL || list->tail == NULL) {
         printf("Fatal error, Head and Tail is NULL when operating, terminating");
@@ -83,7 +101,7 @@ void insertFront(List *list, void *toBeAdded) {
 
 Node *initializeNode(void *data) {
     if (!dataVerification(data)) {
-        printf("Data not legal, skip this data.");
+        printf("\nData not legal, skip this data.\n");
         return NULL;
     }
     Node *node = malloc(sizeof(Node));
@@ -144,7 +162,6 @@ void clearList(List *list) {
         clearList(list);
     } else {
         // head = tail != NULL
-        //TODO test three situations
         list->deleteData(list->tail->data);
         free(list->tail);
     }
@@ -163,6 +180,11 @@ void *getFromBack(List list) {
     return list.tail->data;
 }
 
+/**
+ * in this function, the ideal of separate by '; ' is come from the in-class example.
+ * @param list
+ * @return
+ */
 char *toString(List list) {
     listVerification(&list);
     void *elem;
@@ -240,6 +262,9 @@ void insertSorted(List *list, void *toBeAdded) {
     listVerification(list);
     if (list->tail == NULL && list->head == NULL) {
         Node *nodeAdded = initializeNode(toBeAdded);
+        if (nodeAdded == NULL) {
+            return;
+        }
         list->tail = list->head = nodeAdded;
         return;
     }
@@ -258,6 +283,9 @@ void insertSorted(List *list, void *toBeAdded) {
                     return;
                 } else {
                     Node *node = initializeNode(toBeAdded);
+                    if (node == NULL) {
+                        return;
+                    }
                     if (iter.current == NULL) {
                         Node *currentElemNode = list->tail;
                         node->previous = currentElemNode->previous;
@@ -295,6 +323,9 @@ void insertSorted(List *list, void *toBeAdded) {
                     return;
                 } else {
                     Node *node = initializeNode(toBeAdded);
+                    if (node == NULL) {
+                        return;
+                    }
                     if (iter.current == NULL) {
                         Node *currentElemNode = list->tail;
                         node->previous = currentElemNode->previous;
