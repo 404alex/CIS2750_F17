@@ -3,5 +3,5 @@ project(CIS2750A0)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_FLAGS "-Wall -g")
-set(SOURCE_FILES test.c LinkedListAPI.c LinkedListAPI.h CalendarParser.h CalendarParser.c)
+set(SOURCE_FILES test.c scr/LinkedListAPI.c include/LinkedListAPI.h include/CalendarParser.h scr/CalendarParser.c)
 add_executable(CIS2750A0 ${SOURCE_FILES})

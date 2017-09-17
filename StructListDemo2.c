@@ -3,7 +3,7 @@
  */
 #include <stdio.h>
 #include <string.h>
-#include "LinkedListAPI.h"
+#include "include/LinkedListAPI.h"
 
 typedef struct name {
 	char* firstName;

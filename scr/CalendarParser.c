@@ -8,7 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "CalendarParser.h"
+#include "../include/CalendarParser.h"
 
 //already tested, no memory leak, no error.
 char *stringToLower(char *string) {

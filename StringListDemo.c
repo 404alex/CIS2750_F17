@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "LinkedListAPI.h"
+#include "include/LinkedListAPI.h"
 
 //Printing a string requires a simple cast
 char* printFunc(void *toBePrinted){
