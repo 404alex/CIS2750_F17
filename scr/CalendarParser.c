@@ -9,6 +9,20 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "../include/CalendarParser.h"
+#include "../include/LinkedListAPI.h"
+
+char *printCalenderObjFunc(void *toBePrinted) {
+    return NULL;
+}
+
+int compareCalenderObjFunc(const void *first, const void *second) {
+    return 0;
+}
+
+void deleteCalenderObjFunc(void *toBeDeleted) {
+    free(toBeDeleted);
+}
+
 
 //already tested, no memory leak, no error.
 char *stringToLower(char *string) {
@@ -43,6 +57,42 @@ bool fileNameCheck(char *fileName) {
     }
 }
 
+/**
+ * http://blog.csdn.net/zdyueguanyun/article/details/51392736
+ * @param file file point
+ * @return the length of the file.
+ */
+int fileSize(FILE *file) {
+    fseek(file, 0, SEEK_END);
+    int size = ftell(file);
+    rewind(file);
+    return size;
+}
+
+/**
+ * read the whole file and return a string, the string is dynamic allocate, so need free!
+ * @param file file point
+ * @return the string of whole file, need free.
+ */
+char *readIntoBuffer(FILE *file) {
+    char *fileBuffer = malloc(sizeof(char) * (fileSize(file) + 2));
+    strcpy(fileBuffer, "");
+    char temp[100];
+    while ((fgets(temp, 100, file)) != NULL) {
+        strcat(fileBuffer, temp);
+    }
+    return fileBuffer;
+}
+
+char *unFlodICSFile(char *icsFile) {
+    char *temp = icsFile;
+    while (*temp) {
+        if (strncpy(temp, "\n ", 2) == 0) {
+
+        }
+        temp++;
+    }
+}
 
 ErrorCode createCalendar(char *fileName, Calendar **obj) {
     if (!fileNameCheck(fileName)) {
@@ -53,8 +103,11 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         perror("File opening failed.");
         return INV_FILE;
     }
+    char *icsFile = readIntoBuffer(calFile);
+    List list = initializeList(&printCalenderObjFunc, &deleteDataFromList, &compareCalenderObjFunc);
 
 
+    free(icsFile);
     fclose(calFile);
 
 }
