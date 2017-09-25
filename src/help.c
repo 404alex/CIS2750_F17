@@ -156,21 +156,25 @@ ErrorCode fileValidation(List listOfToken) {
     int veventCount = 0;
     int eventCount = 0;
     int versionCount = 0;
+    int prodidCount = 0;
     regex_t beginCalRegex;
     regex_t endCalRegex;
     regex_t beginEveRegex;
     regex_t endEveRegex;
     regex_t versionRegex;
+    regex_t proidRegex;
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*2.0$";
+    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:";
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
     regcomp(&endEveRegex, endEvePattern, REG_NOSUB);
     regcomp(&versionRegex, versionPattern, REG_NOSUB);
+    regcomp(&proidRegex, proidPattern, REG_NOSUB);
 
 
     ListIterator iter = createIterator(listOfToken);
@@ -190,6 +194,7 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&beginEveRegex);
             regfree(&endEveRegex);
             regfree(&versionRegex);
+            regfree(&proidRegex);
             return INV_CAL;
         }
         //vevent verified
@@ -200,6 +205,7 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&beginEveRegex);
                 regfree(&endEveRegex);
                 regfree(&versionRegex);
+                regfree(&proidRegex);
                 return INV_EVENT;
             }
             veventCount++;
@@ -214,11 +220,13 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&beginEveRegex);
             regfree(&endEveRegex);
             regfree(&versionRegex);
+            regfree(&proidRegex);
 
             return INV_EVENT;
         }
 
 
+        //version verified
         if (regexec(&versionRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
             if (vcaleCount != 1 || veventCount != 0) {
                 regfree(&beginCalRegex);
@@ -226,9 +234,24 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&beginEveRegex);
                 regfree(&endEveRegex);
                 regfree(&versionRegex);
+                regfree(&proidRegex);
                 return INV_VER;
             }
             versionCount++;
+        }
+
+        //prodid verified
+        if (regexec(&proidRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
+            if (vcaleCount != 1 || veventCount != 0) {
+                regfree(&beginCalRegex);
+                regfree(&endCalRegex);
+                regfree(&beginEveRegex);
+                regfree(&endEveRegex);
+                regfree(&versionRegex);
+                regfree(&proidRegex);
+                return INV_PRODID;
+            }
+            prodidCount++;
         }
 
 
@@ -240,6 +263,7 @@ ErrorCode fileValidation(List listOfToken) {
     regfree(&beginEveRegex);
     regfree(&endEveRegex);
     regfree(&versionRegex);
+    regfree(&proidRegex);
     if (vcaleCount != 0) {
         return INV_CAL;
     }
@@ -249,8 +273,14 @@ ErrorCode fileValidation(List listOfToken) {
     if (versionCount == 0) {
         return INV_VER;
     }
+    if (prodidCount == 0) {
+        return INV_PRODID;
+    }
     if (versionCount != calenderCount) {
         return DUP_VER;
+    }
+    if (prodidCount != calenderCount) {
+        return DUP_PRODID;
     }
     if (calenderCount == 0) {
         return INV_CAL;

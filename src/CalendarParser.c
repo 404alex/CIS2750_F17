@@ -42,7 +42,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         clearList(&listOfToken);
         free(icsFile);
         fclose(calFile);
-        return INV_FILE;
+        return INV_CAL;
     }
     ErrorCode response = fileValidation(listOfToken);
     if (response != OK) {
