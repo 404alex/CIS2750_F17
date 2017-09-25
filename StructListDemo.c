@@ -12,7 +12,7 @@ typedef struct name {
 } Name;
 
 //printFunc will return a string that contains a humanly readable copy of the list contents
-char *printFunc(void *toBePrinted) {
+charrintFunc(void *toBePrinted) {
 
     char *tmpStr;
     Name *tmpName;

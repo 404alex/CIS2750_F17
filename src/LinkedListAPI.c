@@ -26,11 +26,11 @@
  * if the list not exists, terminate the program.
  * @param list pointer of the list.
  */
-void listVerification(List *list) {
+int listVerification(List *list) {
     if (list == NULL) {
-        printf("Fatal error, list not exists, terminating");
-        exit(0);
+        return 0;
     }
+    return 1;
 }
 
 /**
@@ -38,11 +38,11 @@ void listVerification(List *list) {
  * if the head or tail is NULL, terminate the program.
  * @param list pointer of the list.
  */
-void headTailVerification(List *list) {
+int headTailVerification(List *list) {
     if (list->head == NULL || list->tail == NULL) {
-        printf("Fatal error, Head and Tail is NULL when operating, terminating");
-        exit(0);
+        return 0;
     }
+    return 1;
 }
 
 /**
@@ -68,7 +68,9 @@ bool dataVerification(void *data) {
 
 
 void insertBack(List *list, void *toBeAdded) {
-    listVerification(list);
+    if (listVerification(list) == 0) {
+        return;
+    }
     Node *nodeAdded = initializeNode(toBeAdded);
     if (nodeAdded == NULL) {
         return;
@@ -84,7 +86,9 @@ void insertBack(List *list, void *toBeAdded) {
 }
 
 void insertFront(List *list, void *toBeAdded) {
-    listVerification(list);
+    if (listVerification(list) == 0) {
+        return;
+    }
     Node *nodeAdded = initializeNode(toBeAdded);
     if (nodeAdded == NULL) {
         return;
@@ -149,7 +153,9 @@ void clearList(List *list) {
     //1st, the head = tail = NULL
     //2nd, the head = tail != NULL
     //3rd. the head != tail
-    listVerification(list);
+    if (listVerification(list) == 0) {
+        return;
+    }
     //head = tail = NULL
     if (list->head == list->tail && list->tail == NULL) {
         return;
@@ -159,24 +165,35 @@ void clearList(List *list) {
         list->tail = list->tail->previous;
         list->deleteData(list->tail->next->data);
         free(list->tail->next);
+        list->tail->next = NULL;
         clearList(list);
     } else {
         // head = tail != NULL
         list->deleteData(list->tail->data);
         free(list->tail);
+        list->tail = NULL;
+        list->head = NULL;
     }
 
 }
 
 void *getFromFront(List list) {
-    listVerification(&list);
-    headTailVerification(&list);
+    if (listVerification(&list) == 0) {
+        return NULL;
+    }
+    if (headTailVerification(&list) == 0) {
+        return NULL;
+    }
     return list.head->data;
 }
 
 void *getFromBack(List list) {
-    listVerification(&list);
-    headTailVerification(&list);
+    if (listVerification(&list) == 0) {
+        return NULL;
+    }
+    if (headTailVerification(&list) == 0) {
+        return NULL;
+    }
     return list.tail->data;
 }
 
@@ -205,7 +222,12 @@ char *toString(List list) {
 }
 
 void *deleteDataFromList(List *list, void *toBeDeleted) {
-    listVerification(list);
+    if (listVerification(list) == 0) {
+        return NULL;
+    }
+    if (toBeDeleted == NULL) {
+        return NULL;
+    }
     if (list->head == NULL && list->tail == NULL) {
         return NULL;
     }
@@ -259,7 +281,10 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
 void insertSorted(List *list, void *toBeAdded) {
     //insert into a sorted list.
     //two situations: 1st, low to high sorted, 2nd, high to low sorted.
-    listVerification(list);
+
+    if (listVerification(list) == 0) {
+        return;
+    }
     if (list->tail == NULL && list->head == NULL) {
         Node *nodeAdded = initializeNode(toBeAdded);
         if (nodeAdded == NULL) {
