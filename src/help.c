@@ -140,7 +140,7 @@ bool unFoldData(List *listOfToken) {
             int size = strlen(previousData) + strlen(string) + 5;
             char *newData = malloc(sizeof(char) * size);
             strcpy(newData, previousData);
-            strcat(newData, string);
+            strcat(newData, string + 1);
             iter.current->previous->data = newData;
             listOfToken->deleteData(previousData);
             free(string);
@@ -157,24 +157,37 @@ ErrorCode fileValidation(List listOfToken) {
     int eventCount = 0;
     int versionCount = 0;
     int prodidCount = 0;
+    int uidCount = 0;
+    int dtStampCount = 0;
     regex_t beginCalRegex;
     regex_t endCalRegex;
     regex_t beginEveRegex;
     regex_t endEveRegex;
     regex_t versionRegex;
     regex_t proidRegex;
+    regex_t uidRegex;
+    regex_t dtStampRegex;
+    regex_t dtstartRegex;
+    regex_t dtendRegex;
+    regex_t durationRegex;
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]+$";
-    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[A-Za-z/\\\\\\.\\-]{1}.*";
+    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
+    char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
+    char *dtStampPattern = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[A-Za-z]{1}$";
+    char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[A-Za-z]{1}$";
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
     regcomp(&endEveRegex, endEvePattern, REG_NOSUB);
     regcomp(&versionRegex, versionPattern, REG_EXTENDED);
     regcomp(&proidRegex, proidPattern, REG_EXTENDED);
+    regcomp(&uidRegex, uidPattern, REG_EXTENDED);
+    regcomp(&dtStampRegex, dtStampPattern, REG_EXTENDED);
+    regcomp(&dtstartRegex, dtstartPattern, REG_EXTENDED);
 
 
     ListIterator iter = createIterator(listOfToken);
@@ -195,6 +208,9 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&endEveRegex);
             regfree(&versionRegex);
             regfree(&proidRegex);
+            regfree(&uidRegex);
+            regfree(&dtStampRegex);
+            regfree(&dtstartRegex);
             return INV_CAL;
         }
         //vevent verified
@@ -206,6 +222,10 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&endEveRegex);
                 regfree(&versionRegex);
                 regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
                 return INV_EVENT;
             }
             veventCount++;
@@ -221,6 +241,10 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&endEveRegex);
             regfree(&versionRegex);
             regfree(&proidRegex);
+            regfree(&uidRegex);
+            regfree(&dtStampRegex);
+            regfree(&dtstartRegex);
+
 
             return INV_EVENT;
         }
@@ -235,6 +259,10 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&endEveRegex);
                 regfree(&versionRegex);
                 regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
                 return INV_VER;
             }
             versionCount++;
@@ -249,9 +277,74 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&endEveRegex);
                 regfree(&versionRegex);
                 regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
                 return INV_PRODID;
             }
             prodidCount++;
+        }
+
+        //UID verified
+        if (regexec(&uidRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
+            if (vcaleCount != 1 || veventCount != 1) {
+                regfree(&beginCalRegex);
+                regfree(&endCalRegex);
+                regfree(&beginEveRegex);
+                regfree(&endEveRegex);
+                regfree(&versionRegex);
+                regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
+                return INV_EVENT;
+            }
+            uidCount++;
+        }
+
+
+        //created time verified
+        if (regexec(&dtStampRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
+            if (vcaleCount != 1 || veventCount != 1) {
+                regfree(&beginCalRegex);
+                regfree(&endCalRegex);
+                regfree(&beginEveRegex);
+                regfree(&endEveRegex);
+                regfree(&versionRegex);
+                regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
+                return INV_EVENT;
+            }
+            dtStampCount++;
+        }
+
+
+
+        //dtstart Verification
+        if (regexec(&dtstartRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
+            if (vcaleCount != 1 || veventCount != 1) {
+                regfree(&beginCalRegex);
+                regfree(&endCalRegex);
+                regfree(&beginEveRegex);
+                regfree(&endEveRegex);
+                regfree(&versionRegex);
+                regfree(&proidRegex);
+                regfree(&uidRegex);
+                regfree(&dtStampRegex);
+                regfree(&dtstartRegex);
+
+                return INV_EVENT;
+            } else {
+                Node *p = iter.current->previous;
+                while (regexec(&endEveRegex, p->data, NULL, NULL, 0) != REG_NOMATCH) {
+                    if()
+                }
+            }
         }
 
 
@@ -264,6 +357,10 @@ ErrorCode fileValidation(List listOfToken) {
     regfree(&endEveRegex);
     regfree(&versionRegex);
     regfree(&proidRegex);
+    regfree(&uidRegex);
+    regfree(&dtStampRegex);
+    regfree(&dtstartRegex);
+
     if (vcaleCount != 0) {
         return INV_CAL;
     }
@@ -288,7 +385,25 @@ ErrorCode fileValidation(List listOfToken) {
     if (eventCount == 0) {
         return INV_EVENT;
     }
+    if (uidCount != eventCount) {
+        return INV_EVENT;
+    }
+    if (dtStampCount != eventCount) {
+        return INV_EVENT;
+    }
 
     return OK;
 
+}
+
+
+void deleteCommont(List *listOfToken) {
+    ListIterator iter = createIterator(*listOfToken);
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        if (strncmp(";", elem, 1) == 0) {
+            void *deletedData = deleteDataFromList(listOfToken, elem);
+            listOfToken->deleteData(deletedData);
+        }
+    }
 }

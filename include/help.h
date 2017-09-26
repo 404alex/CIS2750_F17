@@ -46,3 +46,6 @@ bool unFoldData(List *listOfToken);
  * @return
  */
 ErrorCode fileValidation(List listOfToken);
+
+
+void deleteCommont(List *listOfToken);

@@ -44,6 +44,8 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         fclose(calFile);
         return INV_CAL;
     }
+    deleteCommont(&listOfToken);
+
     ErrorCode response = fileValidation(listOfToken);
     if (response != OK) {
         clearList(&listOfToken);
