@@ -159,6 +159,9 @@ ErrorCode fileValidation(List listOfToken) {
     int prodidCount = 0;
     int uidCount = 0;
     int dtStampCount = 0;
+    int endTimeCount = 0;
+    int dtstartCount = 0;
+    int dtendCount = 0;
     regex_t beginCalRegex;
     regex_t endCalRegex;
     regex_t beginEveRegex;
@@ -179,6 +182,8 @@ ErrorCode fileValidation(List listOfToken) {
     char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *dtStampPattern = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[A-Za-z]{1}$";
     char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[A-Za-z]{1}$";
+    char *dtendPattern = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[A-Za-z]{1}$";
+    char *durationPattern = "[Dd][Uu][Rr][Aa][Tt][Ii][Oo][Nn]:[ ]*[Pp][Tt][0-9]*[Hh]?[0-9]*[Mm]?[0-9]*[Ss]?$";
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
@@ -188,6 +193,8 @@ ErrorCode fileValidation(List listOfToken) {
     regcomp(&uidRegex, uidPattern, REG_EXTENDED);
     regcomp(&dtStampRegex, dtStampPattern, REG_EXTENDED);
     regcomp(&dtstartRegex, dtstartPattern, REG_EXTENDED);
+    regcomp(&dtendRegex, dtendPattern, REG_EXTENDED);
+    regcomp(&durationRegex, durationPattern, REG_EXTENDED);
 
 
     ListIterator iter = createIterator(listOfToken);
@@ -211,6 +218,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&uidRegex);
             regfree(&dtStampRegex);
             regfree(&dtstartRegex);
+            regfree(&dtendRegex);
+            regfree(&durationRegex);
             return INV_CAL;
         }
         //vevent verified
@@ -225,6 +234,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_EVENT;
             }
@@ -244,6 +255,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&uidRegex);
             regfree(&dtStampRegex);
             regfree(&dtstartRegex);
+            regfree(&dtendRegex);
+            regfree(&durationRegex);
 
 
             return INV_EVENT;
@@ -262,6 +275,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_VER;
             }
@@ -280,6 +295,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_PRODID;
             }
@@ -298,6 +315,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_EVENT;
             }
@@ -317,14 +336,18 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_EVENT;
             }
             dtStampCount++;
         }
 
-
-
+        if (regexec(&dtendRegex, elem, NULL, NULL, 0) != REG_NOMATCH ||
+            regexec(&durationRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
+            dtendCount++;
+        }
         //dtstart Verification
         if (regexec(&dtstartRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
             if (vcaleCount != 1 || veventCount != 1) {
@@ -337,17 +360,39 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&uidRegex);
                 regfree(&dtStampRegex);
                 regfree(&dtstartRegex);
+                regfree(&dtendRegex);
+                regfree(&durationRegex);
 
                 return INV_EVENT;
             } else {
+                dtstartCount++;
                 Node *p = iter.current->previous;
-                while (regexec(&endEveRegex, p->data, NULL, NULL, 0) != REG_NOMATCH) {
-                    if()
+                while (p != NULL && regexec(&endEveRegex, p->data, NULL, NULL, 0) == REG_NOMATCH) {
+                    if (regexec(&dtendRegex, p->data, NULL, NULL, 0) != REG_NOMATCH ||
+                        regexec(&durationRegex, p->data, NULL, NULL, 0) != REG_NOMATCH) {
+                        endTimeCount++;
+                    }
+                    p = p->next;
+                }
+                if (endTimeCount != 1) {
+                    endTimeCount = 0;
+                    regfree(&beginCalRegex);
+                    regfree(&endCalRegex);
+                    regfree(&beginEveRegex);
+                    regfree(&endEveRegex);
+                    regfree(&versionRegex);
+                    regfree(&proidRegex);
+                    regfree(&uidRegex);
+                    regfree(&dtStampRegex);
+                    regfree(&dtstartRegex);
+                    regfree(&dtendRegex);
+                    regfree(&durationRegex);
+                    return INV_EVENT;
+                } else {
+                    endTimeCount = 0;
                 }
             }
         }
-
-
     }
 
 
@@ -360,6 +405,8 @@ ErrorCode fileValidation(List listOfToken) {
     regfree(&uidRegex);
     regfree(&dtStampRegex);
     regfree(&dtstartRegex);
+    regfree(&dtendRegex);
+    regfree(&durationRegex);
 
     if (vcaleCount != 0) {
         return INV_CAL;
@@ -389,6 +436,9 @@ ErrorCode fileValidation(List listOfToken) {
         return INV_EVENT;
     }
     if (dtStampCount != eventCount) {
+        return INV_EVENT;
+    }
+    if (dtstartCount != dtendCount) {
         return INV_EVENT;
     }
 
