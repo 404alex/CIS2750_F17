@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "include/CalendarParser.h"
-#include "include/help.h"
+#include "CalendarParser.h"
+#include "help.h"
 
 int main() {
     char *string = malloc(sizeof(char) * 100);

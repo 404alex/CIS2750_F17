@@ -8,9 +8,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "../include/CalendarParser.h"
-#include "../include/LinkedListAPI.h"
-#include "../include/help.h"
+#include "CalendarParser.h"
+#include "LinkedListAPI.h"
+#include "help.h"
 
 char *printToken(void *toBePrinted) {
 

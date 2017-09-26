@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "../include/LinkedListAPI.h"
+#include "LinkedListAPI.h"
 
 /**
  * verify whether the list exist.

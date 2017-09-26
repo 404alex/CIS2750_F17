@@ -9,7 +9,7 @@
 #include "LinkedListAPI.h"
 
 //Error codes that indicate what went wrong during parsing
-typedef enum ers {OK, INV_FILE, INV_CAL, INV_VER, DUP_VER, INV_PRODID, DUP_PRODID, INV_EVENT, INV_CREATEDT} ErrorCode;
+typedef enum ers {OK, INV_FILE, INV_CAL, INV_VER, DUP_VER, INV_PRODID, DUP_PRODID, INV_EVENT, INV_CREATEDT, OTHER_ERROR} ErrorCode;
 
 //Represents iCalendar Date-time
 typedef struct dt {
@@ -56,7 +56,7 @@ typedef struct evt {
 typedef struct ical {
 	//iCalendar version
 	float 	version;
-	//Product ID.  We will assume that thDUPe UserID, even if malformed, does not exceed 1000 bytes
+	//Product ID.  We will assume that the UserID, even if malformed, does not exceed 1000 bytes
 	char 	prodID[1000];
 	//Reference to an event.  We will assume that every calendar object will have an event.
 	Event* event;

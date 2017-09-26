@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
-#include "../include/help.h"
-#include "../include/LinkedListAPI.h"
-#include "../include/CalendarParser.h"
+#include "help.h"
+#include "LinkedListAPI.h"
+#include "CalendarParser.h"
 #include <regex.h>
 
 
@@ -167,14 +167,14 @@ ErrorCode fileValidation(List listOfToken) {
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
-    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*2.0$";
-    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:";
+    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]+$";
+    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[A-Za-z/\\\\\\.\\-]{1}.*";
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
     regcomp(&endEveRegex, endEvePattern, REG_NOSUB);
-    regcomp(&versionRegex, versionPattern, REG_NOSUB);
-    regcomp(&proidRegex, proidPattern, REG_NOSUB);
+    regcomp(&versionRegex, versionPattern, REG_EXTENDED);
+    regcomp(&proidRegex, proidPattern, REG_EXTENDED);
 
 
     ListIterator iter = createIterator(listOfToken);
