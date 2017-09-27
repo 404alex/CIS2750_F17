@@ -49,3 +49,7 @@ ErrorCode fileValidation(List listOfToken);
 
 
 void deleteCommont(List *listOfToken);
+
+int contentIndicator(void *elem);
+
+int countCalObject(List *listOfToken);
