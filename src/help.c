@@ -276,6 +276,7 @@ ErrorCode fileValidation(List listOfToken) {
         }
 
 
+        //valarm verified.
         if (regexec(&alarmBeginRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
             if (vcaleCount != 1 || veventCount != 1) {
                 regfree(&beginCalRegex);
@@ -313,7 +314,6 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&durationRegex);
             regfree(&alarmBeginRegex);
             regfree(&alarmEndRegex);
-
             return INV_EVENT;
         }
 
@@ -408,9 +408,6 @@ ErrorCode fileValidation(List listOfToken) {
             dtendCount++;
         }
 
-
-
-
         //dtstart Verification
         if (regexec(&dtstartRegex, elem, NULL, NULL, 0) != REG_NOMATCH) {
             if (vcaleCount != 1 || veventCount != 1) {
@@ -432,6 +429,29 @@ ErrorCode fileValidation(List listOfToken) {
                 dtstartCount++;
                 Node *p = iter.current->previous;
                 while (p != NULL && regexec(&endEveRegex, p->data, NULL, NULL, 0) == REG_NOMATCH) {
+                    if (regexec(&alarmBeginRegex, p->data, NULL, NULL, 0) != REG_NOMATCH) {
+                        while (regexec(&alarmEndRegex, p->data, NULL, NULL, 0) == REG_NOMATCH) {
+                            p = p->next;
+                            if (p == NULL) {
+                                regfree(&beginCalRegex);
+                                regfree(&endCalRegex);
+                                regfree(&beginEveRegex);
+                                regfree(&endEveRegex);
+                                regfree(&versionRegex);
+                                regfree(&proidRegex);
+                                regfree(&uidRegex);
+                                regfree(&dtStampRegex);
+                                regfree(&dtstartRegex);
+                                regfree(&dtendRegex);
+                                regfree(&durationRegex);
+                                regfree(&alarmBeginRegex);
+                                regfree(&alarmEndRegex);
+                                return INV_EVENT;
+                            }
+                        }
+                    }
+
+
                     if (regexec(&dtendRegex, p->data, NULL, NULL, 0) != REG_NOMATCH ||
                         regexec(&durationRegex, p->data, NULL, NULL, 0) != REG_NOMATCH) {
                         endTimeCount++;
