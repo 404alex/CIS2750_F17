@@ -13,8 +13,9 @@
 #include "help.h"
 
 char *printToken(void *toBePrinted) {
-
-    printf("\n\n%s\n\n", toBePrinted);
+    char *string = malloc(sizeof(char) * (strlen((char *) toBePrinted) + 5));
+    strcpy(string, (char *) toBePrinted);
+    return string;
 }
 
 int compartToken(const void *first, const void *second) {
@@ -38,7 +39,14 @@ char *printAlarm(void *toBePrinted) {
         strcat(property, "\n");
         free(temp);
     }
-    char *string = malloc()
+    char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
+    strcpy(string, "Alarm:\nAction: ");
+    strcat(string, alarm->action);
+    strcat(string, "\nTrigger: ");
+    strcat(string, alarm->trigger);
+    strcat(string, "\nProperties list:\n");
+    strcat(string, property);
+    return string;
 }
 
 int comparAlarm(const void *first, const void *second) {
@@ -123,9 +131,9 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     while ((elem = nextElement(&iter)) != NULL) {
         switch (contentIndicator(elem)) {
             case 0:
-                obj[index]->event = malloc(sizeof(Event));
-                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
-                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
+//                obj[index]->event = (Event *) malloc(sizeof(Event));
+//                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+//                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
 
             case 1:
                 index++;
@@ -149,6 +157,21 @@ void deleteCalendar(Calendar *obj) {
 }
 
 char *printCalendar(const Calendar *obj) {
+    char *event = printEvent(obj->event);
+
+    char *version = "";
+    gcvt(obj->version, 2, version);
+    char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
+    strcpy(string, "Calendar:\nProduct ID: ");
+    strcat(string, obj->prodID);
+    strcat(string, "\nVersion: ");
+    strcat(string, version);
+    strcat(string, "\nEvent list: \n");
+    strcat(string, event);
+    free(event);
+
+    return string;
+
 
 }
 

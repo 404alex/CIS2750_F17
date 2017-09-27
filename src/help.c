@@ -604,3 +604,52 @@ int contentIndicator(void *elem) {
                &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                &durationRegex, &alarmBeginRegex, &alarmEndRegex);
 }
+
+
+char *printEvent(Event *toBePrinted) {
+    ListIterator iter = createIterator(toBePrinted->properties);
+    char *property = malloc(sizeof(char) * 10);
+    strcpy(property, "");
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = toBePrinted->properties.printData(elem);
+        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
+        strcat(property, temp);
+        strcat(property, "\n");
+        free(temp);
+    }
+
+    ListIterator iter2 = createIterator(toBePrinted->alarms);
+    char *alarms = malloc(sizeof(char) * 10);
+    strcpy(alarms, "");
+    void *elem2;
+    while ((elem2 = nextElement(&iter2)) != NULL) {
+        char *temp = toBePrinted->alarms.printData(elem2);
+        alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
+        strcat(alarms, temp);
+        strcat(alarms, "\n");
+        free(temp);
+    }
+    int lengthOfCreationDT =
+            strlen(toBePrinted->creationDateTime.date) + strlen(toBePrinted->creationDateTime.time) + 30;
+    char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
+    strcpy(creationDateTime, "Date: ");
+    strcat(creationDateTime, toBePrinted->creationDateTime.date);
+    strcat(creationDateTime, "\nTime: ");
+    strcat(creationDateTime, toBePrinted->creationDateTime.time);
+    char *string = malloc(sizeof(char) *
+                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(toBePrinted->UID) +
+                           100));
+    strcpy(string, "Event:\nUID: ");
+    strcat(string, toBePrinted->UID);
+    strcat(string, "\nCreation Date and Time:\n");
+    strcat(string, creationDateTime);
+    strcat(string, "\nAlarm:\n");
+    strcat(string, alarms);
+    strcat(string, "\nProperty list: \n");
+    strcat(string, property);
+    free(property);
+    free(alarms);
+    free(creationDateTime);
+    return string;
+}

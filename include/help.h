@@ -53,3 +53,5 @@ void deleteCommont(List *listOfToken);
 int contentIndicator(void *elem);
 
 int countCalObject(List *listOfToken);
+
+char *printEvent(Event *toBePrinted);
