@@ -162,6 +162,8 @@ ErrorCode fileValidation(List listOfToken) {
     int endTimeCount = 0;
     int dtstartCount = 0;
     int dtendCount = 0;
+    int alarmCount = 0;
+    int valarmCount = 0;
     regex_t beginCalRegex;
     regex_t endCalRegex;
     regex_t beginEveRegex;
@@ -173,6 +175,7 @@ ErrorCode fileValidation(List listOfToken) {
     regex_t dtstartRegex;
     regex_t dtendRegex;
     regex_t durationRegex;
+
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
@@ -237,7 +240,7 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&dtendRegex);
                 regfree(&durationRegex);
 
-                return INV_EVENT;
+                return INV_CAL;
             }
             veventCount++;
             eventCount++;
@@ -430,6 +433,9 @@ ErrorCode fileValidation(List listOfToken) {
         return INV_CAL;
     }
     if (eventCount == 0) {
+        return INV_EVENT;
+    }
+    if (eventCount < calenderCount) {
         return INV_EVENT;
     }
     if (uidCount != eventCount) {
