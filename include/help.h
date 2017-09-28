@@ -26,9 +26,6 @@ int fileSize(FILE *file);
 char *readIntoBuffer(FILE *file);
 
 
-char *unFlodICSFile(char *icsFile);
-
-
 /**
  * insert tokenized string to the list
  * @param icsFile string which need to be tokenized

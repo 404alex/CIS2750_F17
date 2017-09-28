@@ -100,6 +100,11 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_FILE;
     }
     char *icsFile = readIntoBuffer(calFile);
+    if (strlen(icsFile) <= 52) {
+        free(icsFile);
+        fclose(calFile);
+        return INV_FILE;
+    }
     List listOfToken = initializeList(&printToken, &deleteToken, &compartToken);
     insertTokenizedList(icsFile, &listOfToken);
     if (!unFoldData(&listOfToken)) {
@@ -125,7 +130,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_CAL;
     }
     int index = 0;
-    obj = malloc(sizeof(Calendar *) * countOfVCAL);
+    //obj = malloc(sizeof(Calendar *) * countOfVCAL);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
@@ -141,6 +146,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         }
     }
 
+    //deleteCalendar(*obj);
     clearList(&listOfToken);
     free(icsFile);
     fclose(calFile);
