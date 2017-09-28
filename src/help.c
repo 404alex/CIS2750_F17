@@ -181,26 +181,22 @@ ErrorCode fileValidation(List listOfToken) {
 
     const size_t numMatch = 0;
 
-    char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
-    char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
-    char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
-    char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
-    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.[0-9]+$";
+    char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
+    char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
+    char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
+    char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
+    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.[0-9]+[ ]*$";
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
-
-    char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
-    char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
-    char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
-
-    char *dtStampPattern = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
-    char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
-    char *dtendPattern = "^[Dd][Tt][Ee][Nn][Dd][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
-
-
-    char *durationPattern = "^[Dd][Uu][Rr][Aa][Tt][Ii][Oo][Nn]:[ ]*[Pp][Tt][0-9]*[Hh]?[0-9]*[Mm]?[0-9]*[Ss]?$";
-    char *alarmBeginPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
-    char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
+    char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z][ ]*$";
+    char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?[ ]*$";
+    char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?[ ]*$";
+    char *dtStampPattern = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[ ]*$";
+    char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[ ]*$";
+    char *dtendPattern = "^[Dd][Tt][Ee][Nn][Dd][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[ ]*$";
+    char *durationPattern = "^[Dd][Uu][Rr][Aa][Tt][Ii][Oo][Nn]:[ ]*[Pp][Tt][0-9]*[Hh]?[0-9]*[Mm]?[0-9]*[Ss]?[ ]*$";
+    char *alarmBeginPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm][ ]*$";
+    char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm][ ]*$";
 
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
@@ -599,6 +595,13 @@ int contentIndicator(void *elem) {
         return 1;
     }
 
+    if (regexec(&versionRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        return 2;
+    }
+
 
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
@@ -653,4 +656,25 @@ char *printEvent(Event *toBePrinted) {
     free(alarms);
     free(creationDateTime);
     return string;
+}
+
+
+float getVersionNumber(void *elem) {
+    char *num = (char *) elem;
+    regex_t versionNumRegex;
+    char *versionNumPattern = "[0-9]+\\.?[0-9]+";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&versionNumRegex, versionNumPattern, REG_EXTENDED);
+    if (regexec(&versionNumRegex, elem, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&versionNumRegex);
+        return 0;
+    } else {
+        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
+        strncpy(string, (num + strMatch[0].rm_so), (strMatch[0].rm_eo - strMatch[0].rm_so));
+        float versionNumber = atof(string);
+        free(string);
+        return versionNumber;
+    }
+
 }

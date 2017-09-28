@@ -130,26 +130,28 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_CAL;
     }
     int index = 0;
-    //obj = malloc(sizeof(Calendar *) * countOfVCAL);
+    obj = malloc(sizeof(Calendar *) * countOfVCAL);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
         switch (contentIndicator(elem)) {
             case 0:
-//                obj[index]->event = (Event *) malloc(sizeof(Event));
-//                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
-//                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
-
+                obj[index] = (Calendar *) malloc(sizeof(Calendar));
+                obj[index]->event = (Event *) malloc(sizeof(Event));
+                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
+                break;
             case 1:
                 index++;
                 break;
         }
     }
 
-    //deleteCalendar(*obj);
+    deleteCalendar(obj[0]);
     clearList(&listOfToken);
     free(icsFile);
     fclose(calFile);
+    free(obj);
     return OK;
 
 }

@@ -52,3 +52,5 @@ int contentIndicator(void *elem);
 int countCalObject(List *listOfToken);
 
 char *printEvent(Event *toBePrinted);
+
+float getVersionNumber(void *elem);
