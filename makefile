@@ -1,7 +1,7 @@
 CC = gcc
 
-all: parser list 
-parser:
+all: cparser list
+cparser:
 	$(CC) -Iinclude -c src/CalendarParser.c -o bin/CalendarParser.o
 	ar cr bin/libCalendarParser.a bin/CalendarParser.o
 list: include/LinkedListAPI.h
