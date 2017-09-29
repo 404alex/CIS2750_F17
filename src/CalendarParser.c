@@ -133,6 +133,8 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     obj = malloc(sizeof(Calendar *) * countOfVCAL);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
+    char *temp;
+    float versionNumber;
     while ((elem = nextElement(&iter)) != NULL) {
         switch (contentIndicator(elem)) {
             case 0:
@@ -143,6 +145,29 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 break;
             case 1:
                 index++;
+                break;
+            case 2:
+                versionNumber = getVersionNumber(elem);
+                if (versionNumber == 0) {
+                    deleteCalendar(obj[index]);
+                    clearList(&listOfToken);
+                    free(icsFile);
+                    fclose(calFile);
+                    return INV_VER;
+                }
+                obj[index]->version = getVersionNumber(elem);
+                break;
+            case 3:
+                temp = getProdid(elem);
+                if (temp == NULL) {
+                    deleteCalendar(obj[index]);
+                    clearList(&listOfToken);
+                    free(icsFile);
+                    fclose(calFile);
+                    return INV_PRODID;
+                }
+                strcpy(obj[index]->prodID, temp);
+                free(temp);
                 break;
         }
     }

@@ -602,6 +602,13 @@ int contentIndicator(void *elem) {
         return 2;
     }
 
+    if (regexec(&proidRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        return 3;
+    }
+
 
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
@@ -677,4 +684,21 @@ float getVersionNumber(void *elem) {
         return versionNumber;
     }
 
+}
+
+char *getProdid(void *elem) {
+    char *prodid = (char *) elem;
+    regex_t prodidRegex;
+    char *prodidPartten = "[0-9A-Za-z/\\\\\\.\\-]{1}.*";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&prodidRegex, prodidPartten, REG_EXTENDED);
+    if (regexec(&prodidRegex, elem, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&prodidRegex);
+        return NULL;
+    } else {
+        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
+        strncpy(string, (prodid + strMatch[0].rm_so), (strMatch[0].rm_eo - strMatch[0].rm_so));
+        return string;
+    }
 }
