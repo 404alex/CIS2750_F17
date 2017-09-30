@@ -113,7 +113,11 @@ void insertTokenizedList(const char *icsFile, List *listOfToken) {
             break;
         }
         if (strcmp(afterToken, "")) {
-            insertBack(listOfToken, afterToken);
+            char *string = (char *) malloc(sizeof(char) * (strlen(afterToken) + 5));
+            strncpy(string, afterToken, (strlen(afterToken) - 1));
+            strcat(string, "\0");
+            free(afterToken);
+            insertBack(listOfToken, string);
         }
     } while (strcmp(afterToken, "ERROREND"));
 }

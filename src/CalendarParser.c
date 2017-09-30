@@ -122,6 +122,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         fclose(calFile);
         return response;
     }
+
     int countOfVCAL = countCalObject(&listOfToken);
     if (countOfVCAL == 0) {
         clearList(&listOfToken);
@@ -171,6 +172,8 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 break;
         }
     }
+
+
 
     deleteCalendar(obj[0]);
     clearList(&listOfToken);
