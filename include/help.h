@@ -56,3 +56,5 @@ char *printEvent(Event *toBePrinted);
 float getVersionNumber(void *elem);
 
 char *getProdid(void *elem);
+
+bool isEndEvent(void *elem);

@@ -132,16 +132,19 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     }
     int index = 0;
     obj = malloc(sizeof(Calendar *) * countOfVCAL);
+    Event *event = NULL;
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     char *temp;
     float versionNumber;
     while ((elem = nextElement(&iter)) != NULL) {
+
         switch (contentIndicator(elem)) {
             case 0:
                 obj[index] = (Calendar *) malloc(sizeof(Calendar));
                 obj[index]->event = (Event *) malloc(sizeof(Event));
-                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties,
+                                                               &compareProperties);
                 obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
                 break;
             case 1:
@@ -170,9 +173,16 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 strcpy(obj[index]->prodID, temp);
                 free(temp);
                 break;
+            case 4:
+                event = (Event *) malloc(sizeof(Event));
+
+                break;
+            case 5:
+                obj[index]->event = event;
+                break;
+
         }
     }
-
 
 
     deleteCalendar(obj[0]);

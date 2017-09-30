@@ -86,6 +86,7 @@ char *tokenize(const char *str, const char c, int *const startPoint) {
         if (str[i] != c) {
             afterToken[i - *startPoint] = str[i];
         } else {
+            i++;
             break;
         }
     }
@@ -98,7 +99,7 @@ void insertTokenizedList(const char *icsFile, List *listOfToken) {
     int startPoint = 0;
     char *afterToken;
     do {
-        afterToken = tokenize(icsFile, '\n', &startPoint);
+        afterToken = tokenize(icsFile, '\r', &startPoint);
         if (strcmp(afterToken, "\n") == 0) {
             free(afterToken);
             afterToken = "";
@@ -113,11 +114,7 @@ void insertTokenizedList(const char *icsFile, List *listOfToken) {
             break;
         }
         if (strcmp(afterToken, "")) {
-            char *string = (char *) malloc(sizeof(char) * (strlen(afterToken) + 5));
-            strncpy(string, afterToken, (strlen(afterToken) - 1));
-            strcat(string, "\0");
-            free(afterToken);
-            insertBack(listOfToken, string);
+            insertBack(listOfToken, afterToken);
         }
     } while (strcmp(afterToken, "ERROREND"));
 }
@@ -352,54 +349,54 @@ ErrorCode fileValidation(List listOfToken) {
         }
 
         //dtstart Verification
-        if (regexec(&dtstartRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH ||
-            regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 1) {
-                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
-                           &uidRegex,
-                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
-                           &dtendRegex,
-                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-                return INV_EVENT;
-            } else {
-                dtstartCount++;
-                Node *p = iter.current->previous;
-                while (p != NULL && regexec(&endEveRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
-                    if (regexec(&alarmBeginRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH) {
-                        while (regexec(&alarmEndRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
-                            p = p->next;
-                            if (p == NULL) {
-                                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex,
-                                           &proidRegex, &uidRegex,
-                                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex,
-                                           &dtstartRegex, &dtendRegex,
-                                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-                                return INV_EVENT;
-                            }
-                        }
-                    }
-
-
-                    if (regexec(&dtendRegexUTC, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
-                        regexec(&durationRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
-                        regexec(&dtendRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-                        endTimeCount++;
-                    }
-                    p = p->next;
-                }
-                if (endTimeCount != 1) {
-                    endTimeCount = 0;
-                    cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
-                               &uidRegex,
-                               &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
-                               &dtendRegex,
-                               &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-                    return INV_EVENT;
-                } else {
-                    endTimeCount = 0;
-                }
-            }
-        }
+//        if (regexec(&dtstartRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH ||
+//            regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+//            if (vcaleCount != 1) {
+//                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
+//                           &uidRegex,
+//                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
+//                           &dtendRegex,
+//                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+//                return INV_EVENT;
+//            } else {
+//                dtstartCount++;
+//                Node *p = iter.current->previous;
+//                while (p != NULL && regexec(&endEveRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
+//                    if (regexec(&alarmBeginRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH) {
+//                        while (regexec(&alarmEndRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
+//                            p = p->next;
+//                            if (p == NULL) {
+//                                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex,
+//                                           &proidRegex, &uidRegex,
+//                                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex,
+//                                           &dtstartRegex, &dtendRegex,
+//                                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+//                                return INV_EVENT;
+//                            }
+//                        }
+//                    }
+//
+//
+//                    if (regexec(&dtendRegexUTC, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
+//                        regexec(&durationRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
+//                        regexec(&dtendRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+//                        endTimeCount++;
+//                    }
+//                    p = p->next;
+//                }
+//                if (endTimeCount != 1) {
+//                    endTimeCount = 0;
+//                    cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
+//                               &uidRegex,
+//                               &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
+//                               &dtendRegex,
+//                               &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+//                    return INV_EVENT;
+//                } else {
+//                    endTimeCount = 0;
+//                }
+//            }
+//        }
 
     }
 
@@ -447,9 +444,9 @@ ErrorCode fileValidation(List listOfToken) {
     if (dtStampCount != eventCount) {
         return INV_CREATEDT;
     }
-    if ((dtstartCount + alarmCount) != dtendCount) {
-        return INV_EVENT;
-    }
+//    if ((dtstartCount + alarmCount) != dtendCount) {
+//        return INV_EVENT;
+//    }
 
     return OK;
 
@@ -612,6 +609,19 @@ int contentIndicator(void *elem) {
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
         return 3;
     }
+    if (regexec(&beginEveRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        return 4;
+    }
+
+    if (regexec(&endEveRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        return 5;
+    }
 
 
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
@@ -693,7 +703,7 @@ float getVersionNumber(void *elem) {
 char *getProdid(void *elem) {
     char *prodid = (char *) elem;
     regex_t prodidRegex;
-    char *prodidPartten = "[0-9A-Za-z/\\\\\\.\\-]{1}.*";
+    char *prodidPartten = "[0-9/\\\\\\.\\-]{1}.*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&prodidRegex, prodidPartten, REG_EXTENDED);
@@ -702,7 +712,23 @@ char *getProdid(void *elem) {
         return NULL;
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
-        strncpy(string, (prodid + strMatch[0].rm_so), (strMatch[0].rm_eo - strMatch[0].rm_so));
+        sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (prodid + strMatch[0].rm_so));
         return string;
     }
+}
+
+bool isEndEvent(void *elem) {
+    char *string = (char *) elem;
+    regex_t endeventRegex;
+    const size_t numMatch = 0;
+    char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
+    regcomp(&endeventRegex, endEvePattern, REG_EXTENDED);
+    if (regexec(&endeventRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        regfree(&endeventRegex);
+        return true;
+    } else {
+        regfree(&endeventRegex)
+        return false;
+    }
+
 }
