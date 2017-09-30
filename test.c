@@ -7,7 +7,7 @@
 
 int main() {
     char *string = malloc(sizeof(char) * 100);
-    strcpy(string, "testCalShort.ics");
+    strcpy(string, "testCalLong.ics");
     ErrorCode errorCode = createCalendar(string, NULL);
     printf(printError(errorCode));
     free(string);

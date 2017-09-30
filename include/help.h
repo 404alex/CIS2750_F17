@@ -58,3 +58,11 @@ float getVersionNumber(void *elem);
 char *getProdid(void *elem);
 
 bool isEndEvent(void *elem);
+
+char *getUID(void *elem);
+
+char *getUTCDate(void *elem);
+
+char *getUTCTime(void *elem);
+
+char *getTime(void *elem);

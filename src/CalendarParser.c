@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <langinfo.h>
 #include "CalendarParser.h"
 #include "LinkedListAPI.h"
 #include "help.h"
@@ -175,11 +176,38 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 break;
             case 4:
                 event = (Event *) malloc(sizeof(Event));
-
+                while ((elem = nextElement(&iter)) != NULL && !isEndEvent(elem)) {
+                    switch (contentIndicator(elem)) {
+                        case 6:
+                            temp = getUID(elem);
+                            strcpy(event->UID, temp);
+                            free(temp);
+                            break;
+                        case 7:
+                            event->creationDateTime.UTC = true;
+                            temp = getUTCDate(elem);
+                            strcpy(event->creationDateTime.date, temp);
+                            free(temp);
+                            temp = getUTCTime(elem);
+                            strcpy(event->creationDateTime.time, temp);
+                            free(temp);
+                            break;
+                        case 8:
+                            event->creationDateTime.UTC = false;
+                            temp = getUTCDate(elem);
+                            strcpy(event->creationDateTime.date, temp);
+                            free(temp);
+                            temp = getTime(elem);
+                            strcpy(event->creationDateTime.time, temp);
+                            free(temp);
+                            break;
+                    }
+                }
                 break;
             case 5:
                 obj[index]->event = event;
                 break;
+
 
         }
     }
