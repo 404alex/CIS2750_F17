@@ -84,7 +84,6 @@ char *readIntoBuffer(FILE *file) {
 }
 
 /**
- * http://blog.csdn.net/dezhihuang/article/details/49669193
  * tokenize string by some charaters
  * @param str the string which need to be tokenized
  * @param c the delimit characters
@@ -183,21 +182,16 @@ ErrorCode fileValidation(List listOfToken) {
     regex_t versionRegex;
     regex_t proidRegex;
     regex_t uidRegex;
-
     regex_t dtStampRegexUTC;
     regex_t dtstartRegexUTC;
     regex_t dtendRegexUTC;
-
     regex_t dtStampRegex;
     regex_t dtstartRegex;
     regex_t dtendRegex;
-
     regex_t durationRegex;
     regex_t alarmBeginRegex;
     regex_t alarmEndRegex;
-
     const size_t numMatch = 0;
-
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
@@ -214,7 +208,6 @@ ErrorCode fileValidation(List listOfToken) {
     char *durationPattern = "^[Dd][Uu][Rr][Aa][Tt][Ii][Oo][Nn]:[ ]*[Pp][Tt][0-9]*[Hh]?[0-9]*[Mm]?[0-9]*[Ss]?[ ]*$";
     char *alarmBeginPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm][ ]*$";
     char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm][ ]*$";
-
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
@@ -225,17 +218,12 @@ ErrorCode fileValidation(List listOfToken) {
     regcomp(&dtStampRegexUTC, dtStampPatternUTC, REG_EXTENDED);
     regcomp(&dtstartRegexUTC, dtstartPatternUTC, REG_EXTENDED);
     regcomp(&dtendRegexUTC, dtendPatternUTC, REG_EXTENDED);
-
     regcomp(&dtStampRegex, dtStampPattern, REG_EXTENDED);
     regcomp(&dtstartRegex, dtstartPattern, REG_EXTENDED);
     regcomp(&dtendRegex, dtendPattern, REG_EXTENDED);
-
-
     regcomp(&durationRegex, durationPattern, REG_EXTENDED);
     regcomp(&alarmBeginRegex, alarmBeginPattern, REG_EXTENDED);
     regcomp(&alarmEndRegex, alarmEndPattern, REG_EXTENDED);
-
-
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
@@ -247,7 +235,7 @@ ErrorCode fileValidation(List listOfToken) {
         if (regexec(&endCalRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
             vcaleCount--;
         }
-        if (vcaleCount < 0 || vcaleCount > 1) {
+        if (vcaleCount < 0 || vcaleCount > 1) {    // if find two BEGIN:VCAL without END:VCAL return error.
             cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                        &uidRegex,
                        &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
@@ -256,7 +244,7 @@ ErrorCode fileValidation(List listOfToken) {
         }
         //vevent verified
         if (regexec(&beginEveRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1) {
+            if (vcaleCount != 1) {     //if find the BEGIN:VEVENT out side the BEGIN:VCAL, return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -270,7 +258,7 @@ ErrorCode fileValidation(List listOfToken) {
         if (regexec(&endEveRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
             veventCount--;
         }
-        if (veventCount < 0 || veventCount > 1) {
+        if (veventCount < 0 || veventCount > 1) {    //if find two BEGIN:VEVENT without END:VEVENT return error.
             cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                        &uidRegex,
                        &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
@@ -282,7 +270,7 @@ ErrorCode fileValidation(List listOfToken) {
 
         //valarm verified.
         if (regexec(&alarmBeginRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 1) {
+            if (vcaleCount != 1 || veventCount != 1) {   // if find BEGIN:VALARM out side the VEVENT, return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -296,7 +284,7 @@ ErrorCode fileValidation(List listOfToken) {
         if (regexec(&alarmEndRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
             valarmCount--;
         }
-        if (valarmCount < 0 || valarmCount > 1) {
+        if (valarmCount < 0 || valarmCount > 1) {   // if find two BEGIN:VALARM, without one END:VALARM return error.
             cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                        &uidRegex,
                        &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
@@ -306,7 +294,8 @@ ErrorCode fileValidation(List listOfToken) {
 
         //version verified
         if (regexec(&versionRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 0) {
+            if (vcaleCount != 1 || veventCount !=
+                                   0) {  //if find version outside BEGIN:VCAL or inside BEGIN:VENEVT, BEGIN:VALARM return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -319,7 +308,8 @@ ErrorCode fileValidation(List listOfToken) {
 
         //prodid verified
         if (regexec(&proidRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 0) {
+            if (vcaleCount != 1 || veventCount !=
+                                   0) {  //if find prodid outside BEGIN:VCAL or inside BEGIN:VENEVT, BEGIN:VALARM return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -332,7 +322,7 @@ ErrorCode fileValidation(List listOfToken) {
 
         //UID verified
         if (regexec(&uidRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 1) {
+            if (vcaleCount != 1 || veventCount != 1) {  //if find the UID not inside the BEGIN:VEVENT, return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -347,7 +337,7 @@ ErrorCode fileValidation(List listOfToken) {
         //created time verified
         if (regexec(&dtStampRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH ||
             regexec(&dtStampRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            if (vcaleCount != 1 || veventCount != 1) {
+            if (vcaleCount != 1 || veventCount != 1) {  //if find the DTStamp not in the right place return error.
                 cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
                            &uidRegex,
                            &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
@@ -364,56 +354,6 @@ ErrorCode fileValidation(List listOfToken) {
             dtendCount++;
         }
 
-        //dtstart Verification
-//        if (regexec(&dtstartRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH ||
-//            regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-//            if (vcaleCount != 1) {
-//                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
-//                           &uidRegex,
-//                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
-//                           &dtendRegex,
-//                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-//                return INV_EVENT;
-//            } else {
-//                dtstartCount++;
-//                Node *p = iter.current->previous;
-//                while (p != NULL && regexec(&endEveRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
-//                    if (regexec(&alarmBeginRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH) {
-//                        while (regexec(&alarmEndRegex, p->data, numMatch, NULL, 0) == REG_NOMATCH) {
-//                            p = p->next;
-//                            if (p == NULL) {
-//                                cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex,
-//                                           &proidRegex, &uidRegex,
-//                                           &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex,
-//                                           &dtstartRegex, &dtendRegex,
-//                                           &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-//                                return INV_EVENT;
-//                            }
-//                        }
-//                    }
-//
-//
-//                    if (regexec(&dtendRegexUTC, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
-//                        regexec(&durationRegex, p->data, numMatch, NULL, 0) != REG_NOMATCH ||
-//                        regexec(&dtendRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-//                        endTimeCount++;
-//                    }
-//                    p = p->next;
-//                }
-//                if (endTimeCount != 1) {
-//                    endTimeCount = 0;
-//                    cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
-//                               &uidRegex,
-//                               &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
-//                               &dtendRegex,
-//                               &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-//                    return INV_EVENT;
-//                } else {
-//                    endTimeCount = 0;
-//                }
-//            }
-//        }
-
     }
 
 
@@ -422,48 +362,57 @@ ErrorCode fileValidation(List listOfToken) {
                &durationRegex, &alarmBeginRegex, &alarmEndRegex);
 
     if (vcaleCount != 0) {
+        //if there is some BEGIN:VCAL do not have valid END:VCAL return error.
         return INV_CAL;
     }
     if (veventCount != 0) {
+        // if there is some BEGIN:VEVENT do not have valid END:VEVENT, return error.
         return INV_EVENT;
     }
     if (versionCount == 0) {
+        // if in the file, there is no versionNumver, return error.
         return INV_VER;
     }
-    if (versionCount != calenderCount) {
+    if (versionCount < calenderCount) {
+        //if in the file, there is some BEGIN:VCAL pairs do not have a version number. return error.
         return INV_VER;
-    }
-    if (prodidCount == 0) {
-        return INV_PRODID;
     }
     if (versionCount > calenderCount) {
+        //if in the file, the number of version values more than the number of the BEGIN:VCAL pair, return error.
         return DUP_VER;
     }
+    if (prodidCount == 0) {
+        //if in the file, there is no prodid, return error.
+        return INV_PRODID;
+    }
     if (prodidCount < calenderCount) {
+        //if in the file, there is some BEGIN:VCAL pairs do not have a prodid. return error.
         return INV_PRODID;
     }
     if (prodidCount > calenderCount) {
+        //if in the file, the number of prodid values more than the number of the BEGIN:VCAL pair, return error.
         return DUP_PRODID;
     }
     if (calenderCount == 0) {
+        //if no canlendar component in the file, return error.
         return INV_CAL;
     }
     if (eventCount == 0) {
+        // if no event component in the file, return error.
         return INV_EVENT;
     }
     if (eventCount < calenderCount) {
+        // if the event components less than the calendar components, return error.
         return INV_EVENT;
     }
     if (uidCount != eventCount) {
+        // if the uid properites number not equal to the event component number, return error.
         return INV_EVENT;
     }
     if (dtStampCount != eventCount) {
+        // if the dtstamp properties number not equal to the event component number, return error.
         return INV_CREATEDT;
     }
-//    if ((dtstartCount + alarmCount) != dtendCount) {
-//        return INV_EVENT;
-//    }
-
     return OK;
 
 }
