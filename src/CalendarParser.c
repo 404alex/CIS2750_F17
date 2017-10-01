@@ -41,11 +41,11 @@ char *printAlarm(void *toBePrinted) {
         free(temp);
     }
     char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
-    strcpy(string, "Alarm:\nAction: ");
+    strcpy(string, "\t\tAction: ");
     strcat(string, alarm->action);
-    strcat(string, "\nTrigger: ");
+    strcat(string, "\n\t\tTrigger: ");
     strcat(string, alarm->trigger);
-    strcat(string, "\nProperties list:\n");
+    strcat(string, "\n\t\tProperties:\n");
     strcat(string, property);
     return string;
 }
@@ -69,7 +69,8 @@ char *printProperties(void *toBePrinted) {
     Property *aProperty = (Property *) toBePrinted;
     int length = strlen(aProperty->propName) + strlen(aProperty->propDescr) + 5;
     char *string = malloc(sizeof(char) * length);
-    strcpy(string, aProperty->propName);
+    strcpy(string, "\t\t-");
+    strcat(string, aProperty->propName);
     strcat(string, ":");
     strcat(string, aProperty->propDescr);
     return string;
@@ -132,8 +133,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_CAL;
     }
     int index = 0;
-    obj = malloc(sizeof(Calendar *) * countOfVCAL);
-    Event *event = NULL;
+    obj = (Calendar **) malloc(sizeof(Calendar *) * countOfVCAL);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     char *temp;
@@ -145,7 +145,6 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         switch (contentIndicator(elem)) {
             case 0:
                 obj[index] = (Calendar *) malloc(sizeof(Calendar));
-                obj[index]->event = (Event *) malloc(sizeof(Event));
                 break;
             case 1:
                 index++;
@@ -174,31 +173,32 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 free(temp);
                 break;
             case 4:
-                event = (Event *) malloc(sizeof(Event));
-                event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+                obj[index]->event = (Event *) malloc(sizeof(Event));
+                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
                 while ((elem = nextElement(&iter)) != NULL && !isEndEvent(elem)) {
                     switch (contentIndicator(elem)) {
                         case 6:
                             temp = getUID(elem);
-                            strcpy(event->UID, temp);
+                            strcpy(obj[index]->event->UID, temp);
                             free(temp);
                             break;
                         case 7:
-                            event->creationDateTime.UTC = true;
+                            obj[index]->event->creationDateTime.UTC = true;
                             temp = getUTCDate(elem);
-                            strcpy(event->creationDateTime.date, temp);
+                            strcpy(obj[index]->event->creationDateTime.date, temp);
                             free(temp);
                             temp = getUTCTime(elem);
-                            strcpy(event->creationDateTime.time, temp);
+                            strcpy(obj[index]->event->creationDateTime.time, temp);
                             free(temp);
                             break;
                         case 8:
-                            event->creationDateTime.UTC = false;
+                            obj[index]->event->creationDateTime.UTC = false;
                             temp = getUTCDate(elem);
-                            strcpy(event->creationDateTime.date, temp);
+                            strcpy(obj[index]->event->creationDateTime.date, temp);
                             free(temp);
                             temp = getTime(elem);
-                            strcpy(event->creationDateTime.time, temp);
+                            strcpy(obj[index]->event->creationDateTime.time, temp);
                             free(temp);
                             break;
                         case 9:
@@ -225,13 +225,13 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                                                 sizeof(Property) + (strlen(description) + 2) * sizeof(char));
                                         strcpy(aProperty->propDescr, description);
                                         strcpy(aProperty->propName, temp);
-                                        insertBack(&alarmTemp->properties, aProperty);
+                                        insertBack(&(alarmTemp->properties), aProperty);
                                         free(temp);
                                         free(description);
                                         break;
                                 }
                             }
-                            insertBack(&obj[index]->event->alarms, alarmTemp);
+                            insertBack(&(obj[index]->event->alarms), alarmTemp);
                             break;
                         default:
                             description = getDescription(elem);
@@ -240,18 +240,13 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                                     sizeof(Property) + (strlen(description) + 2) * sizeof(char));
                             strcpy(aProperty->propDescr, description);
                             strcpy(aProperty->propName, temp);
-                            insertBack(&event->properties, aProperty);
+                            insertBack(&(obj[index]->event->properties), aProperty);
                             free(temp);
                             free(description);
                             break;
                     }
                 }
                 break;
-            case 5:
-                obj[index]->event = event;
-                break;
-
-
         }
     }
     free(icsFile);
@@ -269,45 +264,42 @@ void deleteCalendar(Calendar *obj) {
 
 char *printCalendar(const Calendar *obj) {
     char *event = printEvent(obj->event);
-
-    char *version = "";
+    char *version = malloc(sizeof(char) * 5);
     gcvt(obj->version, 2, version);
     char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
-    strcpy(string, "Calendar:\nProduct ID: ");
-    strcat(string, obj->prodID);
-    strcat(string, "\nVersion: ");
+    strcpy(string, "Calendar: version = ");
     strcat(string, version);
-    strcat(string, "\nEvent list: \n");
+    strcat(string, ", prodID = ");
+    strcat(string, obj->prodID);
+    strcat(string, "\nEvent\n");
     strcat(string, event);
     free(event);
-
+    free(version);
     return string;
-
-
 }
 
 const char *printError(ErrorCode err) {
     switch (err) {
         case OK:
-            return "Create Success";
+            return "Allocated object\nFile parsed successfully\n";
         case INV_EVENT:
-            return "Event Component is invalid. (No event, invalid opening closing tags. Event do not have uid. Event do not have stamp time. Event do not have valid start time end time pair.)";
+            return "Event Component is invalid. (No event, invalid opening closing tags. Event do not have uid. Event do not have stamp time. Event do not have valid start time end time pair.)\n";
         case INV_CAL:
-            return "Calendar it self is invalid. (Invalid opening closing tags. Event outside calender. No calender in the file.)";
+            return "Calendar it self is invalid. (Invalid opening closing tags. Event outside calender. No calender in the file.)\n";
         case INV_VER:
-            return "Version is invalid (Version not under calender block. Calender have no version property. Version number have invalid format.)";
+            return "Version is invalid (Version not under calender block. Calender have no version property. Version number have invalid format.)\n";
         case INV_FILE:
-            return "File is invalid (File argument is NULL, empty, or do not contain .ics extension. File can not be opened. File does not exist.)";
+            return "File is invalid (File argument is NULL, empty, or do not contain .ics extension. File can not be opened. File does not exist.)\n";
         case INV_CREATEDT:
-            return "Event creation date-time error. (Event does not contain valid creation date-time. Event creation date-time at wrong place.)";
+            return "Event creation date-time error. (Event does not contain valid creation date-time. Event creation date-time at wrong place.)\n";
         case INV_PRODID:
-            return "Product id is invalid. (Calendar do not have a product id. Product id put at wrong place.)";
+            return "Product id is invalid. (Calendar do not have a product id. Product id put at wrong place.)\n";
         case DUP_VER:
-            return "One calendar object has more than one version number.";
+            return "One calendar object has more than one version number.\n";
         case DUP_PRODID:
-            return "One calendar object has more than one product id.";
+            return "One calendar object has more than one product id.\n";
         case OTHER_ERROR:
-            return "Some Unknow error. (Do not have enought memory to allocate)";
+            return "Some Unknow error. (Do not have enought memory to allocate)\n";
         default:
             return "Nothing";
     }

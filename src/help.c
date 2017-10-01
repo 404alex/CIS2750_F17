@@ -80,6 +80,7 @@ char *tokenize(const char *str, const char c, int *const startPoint) {
         return "ERROREND";
     }
     char *afterToken = malloc(sizeof(char) * (length + 2 - *startPoint));
+    memset(afterToken, '\0', (length + 2 - *startPoint));
     strcpy(afterToken, "");
     int i = 0;
     for (i = *startPoint; i < length + 1; ++i) {
@@ -155,8 +156,6 @@ ErrorCode fileValidation(List listOfToken) {
     int prodidCount = 0;
     int uidCount = 0;
     int dtStampCount = 0;
-    int endTimeCount = 0;
-    int dtstartCount = 0;
     int dtendCount = 0;
     int valarmCount = 0;
     int alarmCount = 0;
@@ -187,8 +186,8 @@ ErrorCode fileValidation(List listOfToken) {
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
     char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.[0-9]+[ ]*$";
-    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z\/\\\\\\.\\-]{1}.*";
-    char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z\/\\\\\\.\\-]{1}.*";
+    char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
+    char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z][ ]*$";
     char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?[ ]*$";
     char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?[ ]*$";
@@ -544,7 +543,7 @@ int contentIndicator(void *elem) {
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]+$";
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
-    char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z\/\\\\\\.\\-]{1}.*";
+    char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
     char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
     char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
@@ -714,20 +713,24 @@ char *printEvent(Event *toBePrinted) {
     int lengthOfCreationDT =
             strlen(toBePrinted->creationDateTime.date) + strlen(toBePrinted->creationDateTime.time) + 30;
     char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
-    strcpy(creationDateTime, "Date: ");
-    strcat(creationDateTime, toBePrinted->creationDateTime.date);
-    strcat(creationDateTime, "\nTime: ");
+    strcpy(creationDateTime, toBePrinted->creationDateTime.date);
+    strcat(creationDateTime, ":");
     strcat(creationDateTime, toBePrinted->creationDateTime.time);
+    if (toBePrinted->creationDateTime.UTC == true) {
+        strcat(creationDateTime, ", UTC=1");
+    } else {
+        strcat(creationDateTime, ", UTC=0");
+    }
     char *string = malloc(sizeof(char) *
                           (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(toBePrinted->UID) +
                            100));
-    strcpy(string, "Event:\nUID: ");
+    strcpy(string, "\tUID = ");
     strcat(string, toBePrinted->UID);
-    strcat(string, "\nCreation Date and Time:\n");
+    strcat(string, "\n\tcreationDateTime = ");
     strcat(string, creationDateTime);
-    strcat(string, "\nAlarm:\n");
+    strcat(string, "\n\tAlarms:\n");
     strcat(string, alarms);
-    strcat(string, "\nProperty list: \n");
+    strcat(string, "\tOther properties: \n");
     strcat(string, property);
     free(property);
     free(alarms);
@@ -748,7 +751,7 @@ float getVersionNumber(void *elem) {
         return 0;
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
-        strncpy(string, (num + strMatch[0].rm_so), (strMatch[0].rm_eo - strMatch[0].rm_so));
+        sprintf(string, "%.*s", (int) (strMatch[0].rm_eo - strMatch[0].rm_so), (num + strMatch[0].rm_so));
         float versionNumber = atof(string);
         free(string);
         regfree(&versionNumRegex);
@@ -781,7 +784,7 @@ bool isEndEvent(void *elem) {
     const size_t numMatch = 0;
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     regcomp(&endeventRegex, endEvePattern, REG_EXTENDED);
-    if (regexec(&endeventRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+    if (regexec(&endeventRegex, string, numMatch, NULL, 0) != REG_NOMATCH) {
         regfree(&endeventRegex);
         return true;
     } else {
@@ -793,7 +796,7 @@ bool isEndEvent(void *elem) {
 char *getUID(void *elem) {
     char *UID = (char *) elem;
     regex_t uidRegex;
-    char *uidPattern = "[0-9A-Za-z\/\\\\\\.\\-]{1}.*";
+    char *uidPattern = "[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&uidRegex, uidPattern, REG_EXTENDED);
@@ -881,16 +884,16 @@ bool isEndAlarm(void *elem) {
 char *getAlarmAction(void *elem) {
     char *action = (char *) elem;
     regex_t actionRegex;
-    char *actionPattern = "[A-Za-z]$";
+    char *actionPattern = "^[Aa][Cc][Tt][Ii][Oo][Nn]:[ ]*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&actionRegex, actionPattern, REG_EXTENDED);
-    if (regexec(&actionRegex, action + 6, numMatch, strMatch, 0) == REG_NOMATCH) {
+    if (regexec(&actionRegex, action, numMatch, strMatch, 0) == REG_NOMATCH) {
         regfree(&actionRegex);
         return NULL;
     } else {
-        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
-        sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (action + strMatch[0].rm_so + 6));
+        char *string = malloc(sizeof(char) * (strlen(action) - strMatch[0].rm_eo + 5));
+        sprintf(string, "%.*s", (int) (strlen(action) - strMatch[0].rm_eo), (action + strMatch[0].rm_eo));
         regfree(&actionRegex);
         return string;
     }
@@ -908,7 +911,7 @@ char *getAlarmTri(void *elem) {
         return NULL;
     } else {
         char *string = malloc(sizeof(char) * (strlen(trigger) - strMatch[0].rm_eo + 5));
-        sprintf(string, "%.*s", (strlen(trigger) - strMatch[0].rm_eo), (trigger + strMatch[0].rm_eo));
+        sprintf(string, "%.*s", (int) (strlen(trigger) - strMatch[0].rm_eo), (trigger + strMatch[0].rm_eo));
         regfree(&triggerRegex);
         return string;
     }
@@ -917,7 +920,7 @@ char *getAlarmTri(void *elem) {
 char *getName(void *elem) {
     char *name = (char *) elem;
     regex_t nameRegex;
-    char *namePattern = "^[A-Za-z\-]+[:;]{1}";
+    char *namePattern = "^[A-Za-z\\-]+[:;]{1}";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&nameRegex, namePattern, REG_EXTENDED);
@@ -935,7 +938,7 @@ char *getName(void *elem) {
 char *getDescription(void *elem) {
     char *des = (char *) elem;
     regex_t desRegex;
-    char *desPattern = "^[A-Za-z\-]+[:;][ ]*";
+    char *desPattern = "^[A-Za-z\\-]+[:;][ ]*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&desRegex, desPattern, REG_EXTENDED);
@@ -944,7 +947,7 @@ char *getDescription(void *elem) {
         return NULL;
     } else {
         char *string = malloc(sizeof(char) * (strlen(des) - strMatch[0].rm_so + 5));
-        sprintf(string, "%.*s", (strlen(des) - strMatch[0].rm_eo), (des + strMatch[0].rm_eo));
+        sprintf(string, "%.*s", (int) (strlen(des) - strMatch[0].rm_eo), (des + strMatch[0].rm_eo));
         regfree(&desRegex);
         return string;
     }
