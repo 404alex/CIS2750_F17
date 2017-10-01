@@ -133,7 +133,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_CAL;
     }
     int index = 0;
-    obj = (Calendar **) malloc(sizeof(Calendar *) * countOfVCAL);
+    *obj = (Calendar *) malloc(sizeof(Calendar *) * 1);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     char *temp;
@@ -142,12 +142,15 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     Property *aProperty;
     float versionNumber;
     while ((elem = nextElement(&iter)) != NULL) {
+        if (contentIndicator(elem) == 1) {
+            break;
+        }
         switch (contentIndicator(elem)) {
             case 0:
                 obj[index] = (Calendar *) malloc(sizeof(Calendar));
                 break;
             case 1:
-                index++;
+                //index++;
                 break;
             case 2:
                 versionNumber = getVersionNumber(elem);
@@ -260,6 +263,7 @@ void deleteCalendar(Calendar *obj) {
     clearList(&tempEvent->alarms);
     free(tempEvent);
     free(obj);
+
 }
 
 char *printCalendar(const Calendar *obj) {

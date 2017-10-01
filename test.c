@@ -8,12 +8,13 @@
 int main() {
     char *string = malloc(sizeof(char) * 100);
     strcpy(string, "testCalShort.ics");
-    Calendar **obj = NULL;
-    createCalendar(string, obj);
-    char *printInfo = printCalendar(*obj);
+    Calendar *obj;
+    createCalendar(string, &obj);
+    char *printInfo = printCalendar(obj);
     printf(printInfo);
     free(printInfo);
-    deleteCalendar(*obj);
+    free(&obj);
+    deleteCalendar(obj);
     free(string);
     return 0;
 }
