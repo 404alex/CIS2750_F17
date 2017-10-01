@@ -47,6 +47,7 @@ char *printAlarm(void *toBePrinted) {
     strcat(string, alarm->trigger);
     strcat(string, "\n\t\tProperties:\n");
     strcat(string, property);
+    free(property);
     return string;
 }
 
@@ -63,6 +64,7 @@ void deleteAlarm(void *toBeDeleted) {
     Alarm *alarm = (Alarm *) toBeDeleted;
     free(alarm->trigger);
     clearList(&alarm->properties);
+    free(alarm);
 }
 
 char *printProperties(void *toBePrinted) {
@@ -133,7 +135,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         return INV_CAL;
     }
     int index = 0;
-    *obj = (Calendar *) malloc(sizeof(Calendar *) * 1);
+    //*obj = (Calendar *) malloc(sizeof(Calendar *) * 1);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     char *temp;
@@ -224,6 +226,13 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                                     default:
                                         description = getDescription(elem);
                                         temp = getName(elem);
+                                        if (temp == NULL) {
+                                            continue;
+                                        }
+                                        if (description == NULL) {
+                                            description = malloc(sizeof(char) * 2);
+                                            strcpy(description, "");
+                                        }
                                         aProperty = (Property *) malloc(
                                                 sizeof(Property) + (strlen(description) + 2) * sizeof(char));
                                         strcpy(aProperty->propDescr, description);
@@ -239,6 +248,13 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                         default:
                             description = getDescription(elem);
                             temp = getName(elem);
+                            if (temp == NULL) {
+                                continue;
+                            }
+                            if (description == NULL) {
+                                description = malloc(sizeof(char) * 2);
+                                strcpy(description, "");
+                            }
                             aProperty = (Property *) malloc(
                                     sizeof(Property) + (strlen(description) + 2) * sizeof(char));
                             strcpy(aProperty->propDescr, description);
@@ -254,6 +270,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     }
     free(icsFile);
     fclose(calFile);
+    clearList(&listOfToken);
     return OK;
 }
 
@@ -263,7 +280,6 @@ void deleteCalendar(Calendar *obj) {
     clearList(&tempEvent->alarms);
     free(tempEvent);
     free(obj);
-
 }
 
 char *printCalendar(const Calendar *obj) {
@@ -282,6 +298,11 @@ char *printCalendar(const Calendar *obj) {
     return string;
 }
 
+/**
+ * Print readable error message. return string, do not need free!
+ * @param err error code, enum type.
+ * @return a string which do not need to be freed.
+ */
 const char *printError(ErrorCode err) {
     switch (err) {
         case OK:

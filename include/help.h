@@ -6,8 +6,18 @@
 
 #endif //CIS2750A0_HELP_H
 
+/**
+ * string to lower case.
+ * @param string the string pointer which need to be lower case.
+ * @return a string pointer already convert to lower case.
+ */
 char *stringToLower(char *string);
 
+/**
+ * check the file name legal or not. Must contain .ics
+ * @param fileName the path of the file.
+ * @return
+ */
 bool fileNameCheck(char *fileName);
 
 /**

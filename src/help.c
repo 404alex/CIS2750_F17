@@ -10,12 +10,30 @@
 #include <regex.h>
 
 
+/**
+ * regular expression to free all the compailed regular structure
+ * @param beginCalRegex match the pattern: BEGIN:VCALENDAR
+ * @param endCalRegex match the pattern: END:VCALENDAR
+ * @param beginEveRegex match the pattern: BEGIN:VEVENT
+ * @param endEveRegex match the pattern: END:VEVENT
+ * @param versionRegex match the pattern: VERSION:....
+ * @param proidRegex match the pattern: PRODID:....
+ * @param uidRegex match the pattern: UID:....
+ * @param dtStampRegexUTC match the pattern: DTSTAMP.... (UTC format)
+ * @param dtstartRegexUTC match the pattern: DTSTART...  (UTC format)
+ * @param dtendRegexUTC match the pattern: DTEND...  (UTC format)
+ * @param dtStampRegex match the pattern: DTSTAMP... (Not UTC format)
+ * @param dtstartRegex match the pattern: DTSTART... (Not UTC format)
+ * @param dtendRegex match the pattern: DTEND... (Not UTC format)
+ * @param durationRegex match the pattern: DURATION...
+ * @param alarmBeginRegex match the pattern: BEGIN:ALARM...
+ * @param alarmEndRegex match the pattern: END:ALARM
+ */
 void cleanRegex(regex_t *beginCalRegex, regex_t *endCalRegex, regex_t *beginEveRegex, regex_t *endEveRegex,
                 regex_t *versionRegex, regex_t *proidRegex, regex_t *uidRegex, regex_t *dtStampRegexUTC,
                 regex_t *dtstartRegexUTC, regex_t *dtendRegexUTC, regex_t *dtStampRegex, regex_t *dtstartRegex,
                 regex_t *dtendRegex, regex_t *durationRegex, regex_t *alarmBeginRegex, regex_t *alarmEndRegex);
 
-//already tested, no memory leak, no error.
 char *stringToLower(char *string) {
     for (int i = 0; i < strlen(string); ++i) {
         string[i] = tolower(string[i]);
@@ -23,7 +41,6 @@ char *stringToLower(char *string) {
     return string;
 }
 
-//already tested, no memory leak, no error.
 bool fileNameCheck(char *fileName) {
     if (fileName == NULL) {
         return false;
