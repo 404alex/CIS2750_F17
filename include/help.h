@@ -66,3 +66,13 @@ char *getUTCDate(void *elem);
 char *getUTCTime(void *elem);
 
 char *getTime(void *elem);
+
+bool isEndAlarm(void *elem);
+
+char *getAlarmAction(void *elem);
+
+char *getAlarmTri(void *elem);
+
+char *getName(void *elem);
+
+char *getDescription(void *elem);

@@ -137,16 +137,15 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     char *temp;
+    char *description;
+    Alarm *alarmTemp;
+    Property *aProperty;
     float versionNumber;
     while ((elem = nextElement(&iter)) != NULL) {
-
         switch (contentIndicator(elem)) {
             case 0:
                 obj[index] = (Calendar *) malloc(sizeof(Calendar));
                 obj[index]->event = (Event *) malloc(sizeof(Event));
-                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties,
-                                                               &compareProperties);
-                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
                 break;
             case 1:
                 index++;
@@ -176,6 +175,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 break;
             case 4:
                 event = (Event *) malloc(sizeof(Event));
+                event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
                 while ((elem = nextElement(&iter)) != NULL && !isEndEvent(elem)) {
                     switch (contentIndicator(elem)) {
                         case 6:
@@ -201,6 +201,49 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                             strcpy(event->creationDateTime.time, temp);
                             free(temp);
                             break;
+                        case 9:
+                            alarmTemp = (Alarm *) malloc(sizeof(Alarm));
+                            alarmTemp->properties = initializeList(&printProperties, &deleteProperties,
+                                                                   &compareProperties);
+                            while ((elem = nextElement(&iter)) != NULL && !isEndAlarm(elem)) {
+                                switch (contentIndicator(elem)) {
+                                    case 10:
+                                        temp = getAlarmAction(elem);
+                                        strcpy(alarmTemp->action, temp);
+                                        free(temp);
+                                        break;
+                                    case 11:
+                                        temp = getAlarmTri(elem);
+                                        alarmTemp->trigger = malloc(sizeof(char) * (strlen(temp) + 5));
+                                        strcpy(alarmTemp->trigger, temp);
+                                        free(temp);
+                                        break;
+                                    default:
+                                        description = getDescription(elem);
+                                        temp = getName(elem);
+                                        aProperty = (Property *) malloc(
+                                                sizeof(Property) + (strlen(description) + 2) * sizeof(char));
+                                        strcpy(aProperty->propDescr, description);
+                                        strcpy(aProperty->propName, temp);
+                                        insertBack(&alarmTemp->properties, aProperty);
+                                        free(temp);
+                                        free(description);
+                                        break;
+                                }
+                            }
+                            insertBack(&obj[index]->event->alarms, alarmTemp);
+                            break;
+                        default:
+                            description = getDescription(elem);
+                            temp = getName(elem);
+                            aProperty = (Property *) malloc(
+                                    sizeof(Property) + (strlen(description) + 2) * sizeof(char));
+                            strcpy(aProperty->propDescr, description);
+                            strcpy(aProperty->propName, temp);
+                            insertBack(&event->properties, aProperty);
+                            free(temp);
+                            free(description);
+                            break;
                     }
                 }
                 break;
@@ -211,15 +254,9 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
 
         }
     }
-
-
-    deleteCalendar(obj[0]);
-    clearList(&listOfToken);
     free(icsFile);
     fclose(calFile);
-    free(obj);
     return OK;
-
 }
 
 void deleteCalendar(Calendar *obj) {

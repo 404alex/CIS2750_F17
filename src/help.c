@@ -526,21 +526,18 @@ int contentIndicator(void *elem) {
     regex_t versionRegex;
     regex_t proidRegex;
     regex_t uidRegex;
-
     regex_t dtStampRegexUTC;
     regex_t dtstartRegexUTC;
     regex_t dtendRegexUTC;
-
     regex_t dtStampRegex;
     regex_t dtstartRegex;
     regex_t dtendRegex;
-
+    regex_t alarmActionRegex;
     regex_t durationRegex;
     regex_t alarmBeginRegex;
     regex_t alarmEndRegex;
-
+    regex_t alarmTriRegex;
     const size_t numMatch = 0;
-
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
@@ -548,20 +545,17 @@ int contentIndicator(void *elem) {
     char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]+$";
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z\/\\\\\\.\\-]{1}.*";
-
     char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
     char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
     char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
-
     char *dtStampPattern = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
     char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
     char *dtendPattern = "^[Dd][Tt][Ee][Nn][Dd][ ]*;[ ]*[Tt][Zz][Ii][Dd][ ]*=[ ]*.+[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
-
-
     char *durationPattern = "^[Dd][Uu][Rr][Aa][Tt][Ii][Oo][Nn]:[ ]*[Pp][Tt][0-9]*[Hh]?[0-9]*[Mm]?[0-9]*[Ss]?$";
     char *alarmBeginPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
     char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
-
+    char *alarmActionPattern = "^[Aa][Cc][Tt][Ii][Oo][Nn]";
+    char *alarmTriPattern = "^[Tt][Rr][Ii][Gg]{2}[Ee][Rr]";
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
     regcomp(&beginEveRegex, beginEvePattern, REG_NOSUB);
@@ -572,27 +566,29 @@ int contentIndicator(void *elem) {
     regcomp(&dtStampRegexUTC, dtStampPatternUTC, REG_EXTENDED);
     regcomp(&dtstartRegexUTC, dtstartPatternUTC, REG_EXTENDED);
     regcomp(&dtendRegexUTC, dtendPatternUTC, REG_EXTENDED);
-
     regcomp(&dtStampRegex, dtStampPattern, REG_EXTENDED);
     regcomp(&dtstartRegex, dtstartPattern, REG_EXTENDED);
     regcomp(&dtendRegex, dtendPattern, REG_EXTENDED);
-
-
     regcomp(&durationRegex, durationPattern, REG_EXTENDED);
     regcomp(&alarmBeginRegex, alarmBeginPattern, REG_EXTENDED);
     regcomp(&alarmEndRegex, alarmEndPattern, REG_EXTENDED);
-
-
+    regcomp(&alarmActionRegex, alarmActionPattern, REG_EXTENDED);
+    regcomp(&alarmTriRegex, alarmTriPattern, REG_EXTENDED);
     if (regexec(&beginCalRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 0;
     }
     if (regexec(&endCalRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+
         return 1;
     }
 
@@ -600,6 +596,8 @@ int contentIndicator(void *elem) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 2;
     }
 
@@ -607,12 +605,16 @@ int contentIndicator(void *elem) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 3;
     }
     if (regexec(&beginEveRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 4;
     }
 
@@ -620,31 +622,67 @@ int contentIndicator(void *elem) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 5;
     }
     if (regexec(&uidRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 6;
     }
     if (regexec(&dtStampRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 7;
     }
     if (regexec(&dtStampRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
         cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                    &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                    &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
         return 8;
+    }
+
+    if (regexec(&alarmBeginRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+        return 9;
+    }
+
+    if (regexec(&alarmActionRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+        return 10;
+    }
+    if (regexec(&alarmTriRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+        return 11;
     }
 
 
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+    regfree(&alarmActionRegex);
+    regfree(&alarmTriRegex);
     return -1;
 }
 
@@ -713,6 +751,7 @@ float getVersionNumber(void *elem) {
         strncpy(string, (num + strMatch[0].rm_so), (strMatch[0].rm_eo - strMatch[0].rm_so));
         float versionNumber = atof(string);
         free(string);
+        regfree(&versionNumRegex);
         return versionNumber;
     }
 
@@ -731,6 +770,7 @@ char *getProdid(void *elem) {
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
         sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (prodid + strMatch[0].rm_so));
+        regfree(&prodidRegex);
         return string;
     }
 }
@@ -763,6 +803,7 @@ char *getUID(void *elem) {
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
         sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (UID + strMatch[0].rm_so + 3));
+        regfree(&uidRegex);
         return string;
     }
 }
@@ -781,6 +822,7 @@ char *getUTCDate(void *elem) {
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
         sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (date + strMatch[0].rm_so));
+        regfree(&dateRegex);
         return string;
     }
 }
@@ -798,6 +840,7 @@ char *getUTCTime(void *elem) {
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
         sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so - 1), (date + strMatch[0].rm_so));
+        regfree(&dateRegex);
         return string;
     }
 }
@@ -815,7 +858,94 @@ char *getTime(void *elem) {
     } else {
         char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
         sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (date + strMatch[0].rm_so));
+        regfree(&dateRegex);
         return string;
     }
 }
 
+bool isEndAlarm(void *elem) {
+    char *alarm = (char *) elem;
+    char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
+    regex_t alarmRegex;
+    const size_t numMatch = 0;
+    regcomp(&alarmRegex, alarmEndPattern, REG_EXTENDED);
+    if (regexec(&alarmRegex, alarm, numMatch, NULL, 0) != REG_EXTENDED) {
+        regfree(&alarmRegex);
+        return true;
+    } else {
+        regfree(&alarmRegex);
+        return false;
+    }
+}
+
+char *getAlarmAction(void *elem) {
+    char *action = (char *) elem;
+    regex_t actionRegex;
+    char *actionPattern = "[A-Za-z]$";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&actionRegex, actionPattern, REG_EXTENDED);
+    if (regexec(&actionRegex, action + 6, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&actionRegex);
+        return NULL;
+    } else {
+        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
+        sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (action + strMatch[0].rm_so + 6));
+        regfree(&actionRegex);
+        return string;
+    }
+}
+
+char *getAlarmTri(void *elem) {
+    char *trigger = (char *) elem;
+    regex_t triggerRegex;
+    char *triggerPattern = "^[Tt][Rr][Ii][Gg]{2}[Ee][Rr][:;]{1}";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&triggerRegex, triggerPattern, REG_EXTENDED);
+    if (regexec(&triggerRegex, trigger, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&triggerRegex);
+        return NULL;
+    } else {
+        char *string = malloc(sizeof(char) * (strlen(trigger) - strMatch[0].rm_eo + 5));
+        sprintf(string, "%.*s", (strlen(trigger) - strMatch[0].rm_eo), (trigger + strMatch[0].rm_eo));
+        regfree(&triggerRegex);
+        return string;
+    }
+}
+
+char *getName(void *elem) {
+    char *name = (char *) elem;
+    regex_t nameRegex;
+    char *namePattern = "^[A-Za-z\-]+[:;]{1}";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&nameRegex, namePattern, REG_EXTENDED);
+    if (regexec(&nameRegex, name, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&nameRegex);
+        return NULL;
+    } else {
+        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
+        sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so - 1), (name + strMatch[0].rm_so));
+        regfree(&nameRegex);
+        return string;
+    }
+}
+
+char *getDescription(void *elem) {
+    char *des = (char *) elem;
+    regex_t desRegex;
+    char *desPattern = "^[A-Za-z\-]+[:;][ ]*";
+    const size_t numMatch = 1;
+    regmatch_t strMatch[1];
+    regcomp(&desRegex, desPattern, REG_EXTENDED);
+    if (regexec(&desRegex, des, numMatch, strMatch, 0) == REG_NOMATCH) {
+        regfree(&desRegex);
+        return NULL;
+    } else {
+        char *string = malloc(sizeof(char) * (strlen(des) - strMatch[0].rm_so + 5));
+        sprintf(string, "%.*s", (strlen(des) - strMatch[0].rm_eo), (des + strMatch[0].rm_eo));
+        regfree(&desRegex);
+        return string;
+    }
+}
