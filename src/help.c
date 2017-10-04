@@ -1,12 +1,9 @@
 #include <string.h>
-#include <strings.h>
 #include <stdbool.h>
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
 #include "help.h"
-#include "LinkedListAPI.h"
-#include "CalendarParser.h"
 #include <regex.h>
 
 
@@ -35,6 +32,9 @@ void cleanRegex(regex_t *beginCalRegex, regex_t *endCalRegex, regex_t *beginEveR
                 regex_t *dtendRegex, regex_t *durationRegex, regex_t *alarmBeginRegex, regex_t *alarmEndRegex);
 
 char *stringToLower(char *string) {
+    if (string == NULL) {
+        return NULL;
+    }
     for (int i = 0; i < strlen(string); ++i) {
         string[i] = tolower(string[i]);
     }
@@ -42,6 +42,9 @@ char *stringToLower(char *string) {
 }
 
 bool fileNameCheck(char *fileName) {
+    if (fileName == NULL) {
+        return false;
+    }
     if (fileName == NULL) {
         return false;
     }
@@ -66,6 +69,9 @@ bool fileNameCheck(char *fileName) {
 }
 
 int fileSize(FILE *file) {
+    if (file == NULL) {
+        return 0;
+    }
     fseek(file, 0, SEEK_END);
     int size = ftell(file);
     rewind(file);
@@ -74,6 +80,9 @@ int fileSize(FILE *file) {
 
 
 char *readIntoBuffer(FILE *file) {
+    if (file == NULL) {
+        return NULL;
+    }
     char *fileBuffer = malloc(sizeof(char) * (fileSize(file) + 2));
     strcpy(fileBuffer, "");
     char temp[100];
@@ -91,6 +100,10 @@ char *readIntoBuffer(FILE *file) {
  * @return string that after tokenize.
  */
 char *tokenize(const char *str, const char c, int *const startPoint) {
+    if (str == NULL || startPoint == NULL) {
+        return NULL;
+    }
+
     int length = strlen(str);
     if (*startPoint >= length) {
         return "ERROREND";
@@ -113,6 +126,12 @@ char *tokenize(const char *str, const char c, int *const startPoint) {
 }
 
 void insertTokenizedList(const char *icsFile, List *listOfToken) {
+    if (icsFile == NULL) {
+        return;
+    }
+    if (listOfToken == NULL) {
+        return;
+    }
     int startPoint = 0;
     char *afterToken;
     do {
@@ -137,6 +156,9 @@ void insertTokenizedList(const char *icsFile, List *listOfToken) {
 }
 
 bool unFoldData(List *listOfToken) {
+    if (listOfToken == NULL) {
+        return false;
+    }
     ListIterator iter = createIterator(*listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
@@ -164,6 +186,9 @@ bool unFoldData(List *listOfToken) {
 
 
 ErrorCode fileValidation(List listOfToken) {
+    if (listOfToken.length == 0) {
+        return OTHER_ERROR;
+    }
     int vcaleCount = 0;
     int calenderCount = 0;
     int veventCount = 0;
@@ -441,6 +466,9 @@ void cleanRegex(regex_t *beginCalRegex, regex_t *endCalRegex, regex_t *beginEveR
 
 
 void deleteCommont(List *listOfToken) {
+    if (listOfToken == NULL) {
+        return;
+    }
     ListIterator iter = createIterator(*listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
@@ -452,6 +480,12 @@ void deleteCommont(List *listOfToken) {
 }
 
 int countCalObject(List *listOfToken) {
+    if (listOfToken == NULL) {
+        return -1;
+    }
+    if (listOfToken->length == 0) {
+        return -1;
+    }
     ListIterator iter = createIterator(*listOfToken);
     regex_t beginCalRegex;
     regex_t endCalRegex;
@@ -484,6 +518,9 @@ int countCalObject(List *listOfToken) {
 
 
 int contentIndicator(void *elem) {
+    if (elem == NULL) {
+        return -100;
+    }
     regex_t beginCalRegex;
     regex_t endCalRegex;
     regex_t beginEveRegex;
@@ -652,46 +689,50 @@ int contentIndicator(void *elem) {
 }
 
 
-char *printEvent(Event *toBePrinted) {
-    ListIterator iter = createIterator(toBePrinted->properties);
+char *printEvent(void *toBePrinted) {
+    Event *event = (Event *) toBePrinted;
+    if (event == NULL) {
+        return NULL;
+    }
+    ListIterator iter = createIterator(event->properties);
     char *property = malloc(sizeof(char) * 10);
     strcpy(property, "");
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
-        char *temp = toBePrinted->properties.printData(elem);
+        char *temp = event->properties.printData(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
         strcat(property, temp);
         strcat(property, "\n");
         free(temp);
     }
 
-    ListIterator iter2 = createIterator(toBePrinted->alarms);
+    ListIterator iter2 = createIterator(event->alarms);
     char *alarms = malloc(sizeof(char) * 10);
     strcpy(alarms, "");
     void *elem2;
     while ((elem2 = nextElement(&iter2)) != NULL) {
-        char *temp = toBePrinted->alarms.printData(elem2);
+        char *temp = event->alarms.printData(elem2);
         alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
         strcat(alarms, temp);
         strcat(alarms, "\n");
         free(temp);
     }
     int lengthOfCreationDT =
-            strlen(toBePrinted->creationDateTime.date) + strlen(toBePrinted->creationDateTime.time) + 30;
+            strlen(event->creationDateTime.date) + strlen(event->creationDateTime.time) + 30;
     char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
-    strcpy(creationDateTime, toBePrinted->creationDateTime.date);
+    strcpy(creationDateTime, event->creationDateTime.date);
     strcat(creationDateTime, ":");
-    strcat(creationDateTime, toBePrinted->creationDateTime.time);
-    if (toBePrinted->creationDateTime.UTC == true) {
+    strcat(creationDateTime, event->creationDateTime.time);
+    if (event->creationDateTime.UTC == true) {
         strcat(creationDateTime, ", UTC=1");
     } else {
         strcat(creationDateTime, ", UTC=0");
     }
     char *string = malloc(sizeof(char) *
-                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(toBePrinted->UID) +
+                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
                            100));
     strcpy(string, "\tUID = ");
-    strcat(string, toBePrinted->UID);
+    strcat(string, event->UID);
     strcat(string, "\n\tcreationDateTime = ");
     strcat(string, creationDateTime);
     strcat(string, "\n\tAlarms:\n");
@@ -706,6 +747,9 @@ char *printEvent(Event *toBePrinted) {
 
 
 float getVersionNumber(void *elem) {
+    if (elem == NULL) {
+        return 0;
+    }
     char *num = (char *) elem;
     regex_t versionNumRegex;
     char *versionNumPattern = "[0-9]+\\.?[0-9]+";
@@ -727,6 +771,9 @@ float getVersionNumber(void *elem) {
 }
 
 char *getProdid(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *prodid = (char *) elem;
     regex_t prodidRegex;
     char *prodidPartten = "[0-9/\\\\\\.\\-]{1}.*";
@@ -745,6 +792,9 @@ char *getProdid(void *elem) {
 }
 
 bool isEndEvent(void *elem) {
+    if (elem == NULL) {
+        return false;
+    }
     char *string = (char *) elem;
     regex_t endeventRegex;
     const size_t numMatch = 0;
@@ -760,6 +810,9 @@ bool isEndEvent(void *elem) {
 }
 
 char *getUID(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *UID = (char *) elem;
     regex_t uidRegex;
     char *uidPattern = "[0-9A-Za-z/\\\\\\.\\-]{1}.*";
@@ -779,6 +832,9 @@ char *getUID(void *elem) {
 
 
 char *getUTCDate(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *date = (char *) elem;
     regex_t dateRegex;
     char *datePattern = "[0-9]{8}";
@@ -797,6 +853,9 @@ char *getUTCDate(void *elem) {
 }
 
 char *getUTCTime(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *date = (char *) elem;
     regex_t dateRegex;
     char *datePattern = "[0-9]{6}[Z]$";
@@ -815,6 +874,9 @@ char *getUTCTime(void *elem) {
 }
 
 char *getTime(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *date = (char *) elem;
     regex_t dateRegex;
     char *datePattern = "[0-9]{6}$";
@@ -833,6 +895,9 @@ char *getTime(void *elem) {
 }
 
 bool isEndAlarm(void *elem) {
+    if (elem == NULL) {
+        return false;
+    }
     char *alarm = (char *) elem;
     char *alarmEndPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Aa][Ll][Aa][Rr][Mm]$";
     regex_t alarmRegex;
@@ -848,6 +913,9 @@ bool isEndAlarm(void *elem) {
 }
 
 char *getAlarmAction(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *action = (char *) elem;
     regex_t actionRegex;
     char *actionPattern = "^[Aa][Cc][Tt][Ii][Oo][Nn]:[ ]*";
@@ -866,6 +934,9 @@ char *getAlarmAction(void *elem) {
 }
 
 char *getAlarmTri(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *trigger = (char *) elem;
     regex_t triggerRegex;
     char *triggerPattern = "^[Tt][Rr][Ii][Gg]{2}[Ee][Rr][:;]{1}";
@@ -884,6 +955,9 @@ char *getAlarmTri(void *elem) {
 }
 
 char *getName(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *name = (char *) elem;
     regex_t nameRegex;
     char *namePattern = "^[A-Za-z\\-]+[:;]{1}";
@@ -902,6 +976,9 @@ char *getName(void *elem) {
 }
 
 char *getDescription(void *elem) {
+    if (elem == NULL) {
+        return NULL;
+    }
     char *des = (char *) elem;
     regex_t desRegex;
     char *desPattern = "^[A-Za-z\\-]+[:;][ ]*";
@@ -917,4 +994,125 @@ char *getDescription(void *elem) {
         regfree(&desRegex);
         return string;
     }
+}
+
+
+char *printToken(void *toBePrinted) {
+    if (toBePrinted == NULL) {
+        return NULL;
+    }
+    char *string = malloc(sizeof(char) * (strlen((char *) toBePrinted) + 5));
+    strcpy(string, (char *) toBePrinted);
+    return string;
+}
+
+int compartToken(const void *first, const void *second) {
+    if (first == NULL || second == NULL) {
+        return 0;
+    }
+    return strcmp(first, second);
+}
+
+void deleteToken(void *toBeDeleted) {
+    if (toBeDeleted == NULL) {
+        return;
+    }
+    free(toBeDeleted);
+}
+
+char *printAlarm(void *toBePrinted) {
+    if (toBePrinted == NULL) {
+        return NULL;
+    }
+    Alarm *alarm = (Alarm *) toBePrinted;
+    ListIterator iter = createIterator(alarm->properties);
+    char *property = malloc(sizeof(char) * 10);
+    strcpy(property, "");
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = alarm->properties.printData(elem);
+        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
+        strcat(property, temp);
+        strcat(property, "\n");
+        free(temp);
+    }
+    char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
+    strcpy(string, "\t\tAction: ");
+    strcat(string, alarm->action);
+    strcat(string, "\n\t\tTrigger: ");
+    strcat(string, alarm->trigger);
+    strcat(string, "\n\t\tProperties:\n");
+    strcat(string, property);
+    free(property);
+    return string;
+}
+
+int comparAlarm(const void *first, const void *second) {
+    if (first == NULL || second == NULL) {
+        return 0;
+    }
+    Alarm *alarm1 = (Alarm *) first;
+    Alarm *alarm2 = (Alarm *) second;
+    return strcmp(alarm1->trigger, alarm2->trigger);
+}
+
+void deleteAlarm(void *toBeDeleted) {
+    if (toBeDeleted == NULL) {
+        return;
+    }
+    Alarm *alarm = (Alarm *) toBeDeleted;
+    free(alarm->trigger);
+    clearList(&alarm->properties);
+    free(alarm);
+}
+
+char *printProperties(void *toBePrinted) {
+    if (toBePrinted == NULL) {
+        return NULL;
+    }
+    Property *aProperty = (Property *) toBePrinted;
+    int length = strlen(aProperty->propName) + strlen(aProperty->propDescr) + 5;
+    char *string = malloc(sizeof(char) * length);
+    strcpy(string, "\t\t-");
+    strcat(string, aProperty->propName);
+    strcat(string, ":");
+    strcat(string, aProperty->propDescr);
+    return string;
+}
+
+int compareProperties(const void *first, const void *second) {
+    if (first == NULL || second == NULL) {
+        return 0;
+    }
+    Property *Property1 = (Property *) first;
+    Property *Property2 = (Property *) second;
+    return strcmp(Property1->propName, Property2->propName);
+
+}
+
+void deleteProperties(void *toBeDeleted) {
+    if (toBeDeleted == NULL) {
+        return;
+    }
+    Property *aProperty = (Property *) toBeDeleted;
+    free(aProperty);
+}
+
+int compareEvent(const void *first, const void *second) {
+    if (first == NULL || second == NULL) {
+        return 0;
+    }
+    Event *event1 = (Event *) first;
+    Event *event2 = (Event *) second;
+    return strcmp(event1->UID, event2->UID);
+}
+
+void deleteEvent(void *toBeDeleted) {
+    if (toBeDeleted == NULL) {
+        return;
+    }
+    Event *delete = (Event *) toBeDeleted;
+    clearList(&delete->properties);
+    clearList(&delete->alarms);
+    free(delete);
 }

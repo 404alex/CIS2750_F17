@@ -7,92 +7,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
-#include <langinfo.h>
 #include "CalendarParser.h"
 #include "LinkedListAPI.h"
 #include "help.h"
-
-char *printToken(void *toBePrinted) {
-    char *string = malloc(sizeof(char) * (strlen((char *) toBePrinted) + 5));
-    strcpy(string, (char *) toBePrinted);
-    return string;
-}
-
-int compartToken(const void *first, const void *second) {
-    return strcmp(first, second);
-}
-
-void deleteToken(void *toBeDeleted) {
-    free(toBeDeleted);
-}
-
-char *printAlarm(void *toBePrinted) {
-    Alarm *alarm = (Alarm *) toBePrinted;
-    ListIterator iter = createIterator(alarm->properties);
-    char *property = malloc(sizeof(char) * 10);
-    strcpy(property, "");
-    void *elem;
-    while ((elem = nextElement(&iter)) != NULL) {
-        char *temp = alarm->properties.printData(elem);
-        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
-        strcat(property, temp);
-        strcat(property, "\n");
-        free(temp);
-    }
-    char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
-    strcpy(string, "\t\tAction: ");
-    strcat(string, alarm->action);
-    strcat(string, "\n\t\tTrigger: ");
-    strcat(string, alarm->trigger);
-    strcat(string, "\n\t\tProperties:\n");
-    strcat(string, property);
-    free(property);
-    return string;
-}
-
-int comparAlarm(const void *first, const void *second) {
-    if (first == NULL || second == NULL) {
-        return 0;
-    }
-    Alarm *alarm1 = (Alarm *) first;
-    Alarm *alarm2 = (Alarm *) second;
-    return strcmp(alarm1->trigger, alarm2->trigger);
-}
-
-void deleteAlarm(void *toBeDeleted) {
-    Alarm *alarm = (Alarm *) toBeDeleted;
-    free(alarm->trigger);
-    clearList(&alarm->properties);
-    free(alarm);
-}
-
-char *printProperties(void *toBePrinted) {
-    Property *aProperty = (Property *) toBePrinted;
-    int length = strlen(aProperty->propName) + strlen(aProperty->propDescr) + 5;
-    char *string = malloc(sizeof(char) * length);
-    strcpy(string, "\t\t-");
-    strcat(string, aProperty->propName);
-    strcat(string, ":");
-    strcat(string, aProperty->propDescr);
-    return string;
-}
-
-int compareProperties(const void *first, const void *second) {
-    if (first == NULL || second == NULL) {
-        return 0;
-    }
-    Property *Property1 = (Property *) first;
-    Property *Property2 = (Property *) second;
-    return strcmp(Property1->propName, Property2->propName);
-
-}
-
-void deleteProperties(void *toBeDeleted) {
-    Property *aProperty = (Property *) toBeDeleted;
-    free(aProperty);
-}
-
 
 ErrorCode createCalendar(char *fileName, Calendar **obj) {
     if (!fileNameCheck(fileName)) {
@@ -142,6 +59,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     char *description;
     Alarm *alarmTemp;
     Property *aProperty;
+    Event *event;
     float versionNumber;
     while ((elem = nextElement(&iter)) != NULL) {
         if (contentIndicator(elem) == 1) {
@@ -178,32 +96,33 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 free(temp);
                 break;
             case 4:
-                obj[index]->event = (Event *) malloc(sizeof(Event));
-                obj[index]->event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
-                obj[index]->event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
+                obj[index]->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
+                event = (Event *) malloc(sizeof(Event));
+                event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+                event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
                 while ((elem = nextElement(&iter)) != NULL && !isEndEvent(elem)) {
                     switch (contentIndicator(elem)) {
                         case 6:
                             temp = getUID(elem);
-                            strcpy(obj[index]->event->UID, temp);
+                            strcpy(event->UID, temp);
                             free(temp);
                             break;
                         case 7:
-                            obj[index]->event->creationDateTime.UTC = true;
+                            event->creationDateTime.UTC = true;
                             temp = getUTCDate(elem);
-                            strcpy(obj[index]->event->creationDateTime.date, temp);
+                            strcpy(event->creationDateTime.date, temp);
                             free(temp);
                             temp = getUTCTime(elem);
-                            strcpy(obj[index]->event->creationDateTime.time, temp);
+                            strcpy(event->creationDateTime.time, temp);
                             free(temp);
                             break;
                         case 8:
-                            obj[index]->event->creationDateTime.UTC = false;
+                            event->creationDateTime.UTC = false;
                             temp = getUTCDate(elem);
-                            strcpy(obj[index]->event->creationDateTime.date, temp);
+                            strcpy(event->creationDateTime.date, temp);
                             free(temp);
                             temp = getTime(elem);
-                            strcpy(obj[index]->event->creationDateTime.time, temp);
+                            strcpy(event->creationDateTime.time, temp);
                             free(temp);
                             break;
                         case 9:
@@ -243,7 +162,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                                         break;
                                 }
                             }
-                            insertBack(&(obj[index]->event->alarms), alarmTemp);
+                            insertBack(&(event->alarms), alarmTemp);
                             break;
                         default:
                             description = getDescription(elem);
@@ -259,12 +178,13 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                                     sizeof(Property) + (strlen(description) + 2) * sizeof(char));
                             strcpy(aProperty->propDescr, description);
                             strcpy(aProperty->propName, temp);
-                            insertBack(&(obj[index]->event->properties), aProperty);
+                            insertBack(&(event->properties), aProperty);
                             free(temp);
                             free(description);
                             break;
                     }
                 }
+                insertBack(&(obj[index]->events), event);
                 break;
         }
     }
@@ -275,15 +195,25 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
 }
 
 void deleteCalendar(Calendar *obj) {
-    Event *tempEvent = obj->event;
-    clearList(&tempEvent->properties);
-    clearList(&tempEvent->alarms);
-    free(tempEvent);
+    clearList(&(obj->events));
+    //todo obj's properties should as the next goal
+    clearList(&(obj->properties));
     free(obj);
 }
 
 char *printCalendar(const Calendar *obj) {
-    char *event = printEvent(obj->event);
+    char *event = malloc(sizeof(char) * 10);
+    strcpy(event, "");
+    ListIterator iter = createIterator(obj->events);
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = obj->events.printData(elem);
+        event = realloc(event, sizeof(char) * (strlen(event) + strlen(temp) + 7));
+        strcat(event, temp);
+        strcat(event, "\n");
+        free(temp);
+    }
+
     char *version = malloc(sizeof(char) * 5);
     gcvt(obj->version, 2, version);
     char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
@@ -329,3 +259,5 @@ const char *printError(ErrorCode err) {
             return "Nothing";
     }
 }
+
+

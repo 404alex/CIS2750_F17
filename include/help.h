@@ -84,7 +84,7 @@ int countCalObject(List *listOfToken);
  * @param toBePrinted the pointer to an event which need to convert to a readable string.
  * @return a string that converted to readable event list.
  */
-char *printEvent(Event *toBePrinted);
+char *printEvent(void *toBePrinted);
 
 /**
  * get the version number from the file. and convert to float type.
@@ -169,3 +169,25 @@ char *getName(void *elem);
  * @return return a string which is the properties' value.
  */
 char *getDescription(void *elem);
+
+char *printToken(void *toBePrinted);
+
+int compartToken(const void *first, const void *second);
+
+void deleteToken(void *toBeDeleted);
+
+char *printAlarm(void *toBePrinted);
+
+int comparAlarm(const void *first, const void *second);
+
+void deleteAlarm(void *toBeDeleted);
+
+char *printProperties(void *toBePrinted);
+
+int compareProperties(const void *first, const void *second);
+
+void deleteProperties(void *toBeDeleted);
+
+int compareEvent(const void *first, const void *second);
+
+void deleteEvent(void *toBeDeleted);
