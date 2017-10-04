@@ -77,11 +77,13 @@ void insertBack(List *list, void *toBeAdded) {
     }
     if (list->tail == NULL && list->head == NULL) {
         list->tail = list->head = nodeAdded;
+        list->length++;
         return;
     }
     nodeAdded->previous = list->tail;
     list->tail->next = nodeAdded;
     list->tail = nodeAdded;
+    list->length++;
     list->tail->next = NULL;
 }
 
@@ -94,6 +96,7 @@ void insertFront(List *list, void *toBeAdded) {
         return;
     }
     if (list->tail == NULL && list->head == NULL) {
+        list->length++;
         list->tail = list->head = nodeAdded;
         return;
     }
@@ -101,6 +104,7 @@ void insertFront(List *list, void *toBeAdded) {
     nodeAdded->next = list->head;
     list->head->previous = nodeAdded;
     list->head = nodeAdded;
+    list->length++;
 }
 
 Node *initializeNode(void *data) {
@@ -128,6 +132,7 @@ List initializeList(char *(*printFunction)(void *toBePrinted), void (*deleteFunc
     list.printData = printFunction;
     list.head = NULL;
     list.tail = NULL;
+    list.length = 0;
     return list;
 }
 
@@ -153,6 +158,7 @@ void clearList(List *list) {
     //1st, the head = tail = NULL
     //2nd, the head = tail != NULL
     //3rd. the head != tail
+    list->length = 0;
     if (listVerification(list) == 0) {
         return;
     }
@@ -248,6 +254,7 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
                 free(list->head);
                 list->head = NULL;
                 list->tail = NULL;
+                list->length--;
                 return data;
             } else if (iter.current == NULL) {
                 //node at the end
@@ -255,6 +262,7 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
                 void *data = elem;
                 free(list->tail->next);
                 list->tail->next = NULL;
+                list->length--;
                 return data;
             } else if (iter.current->previous->previous == NULL) {
                 //node at the begin
@@ -262,6 +270,7 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
                 void *data = elem;
                 free(list->head->previous);
                 list->head->previous = NULL;
+                list->length--;
                 return data;
             } else {
                 //node at the middle
@@ -270,6 +279,7 @@ void *deleteDataFromList(List *list, void *toBeDeleted) {
                 iter.current->previous->next = iter.current;
                 void *data = elem;
                 free(tempNode);
+                list->length--;
                 return data;
             }
         }
@@ -290,6 +300,7 @@ void insertSorted(List *list, void *toBeAdded) {
         if (nodeAdded == NULL) {
             return;
         }
+        list->length++;
         list->tail = list->head = nodeAdded;
         return;
     }
@@ -317,6 +328,7 @@ void insertSorted(List *list, void *toBeAdded) {
                         node->next = currentElemNode;
                         currentElemNode->previous = node;
                         node->previous->next = node;
+                        list->length++;
                         flag++;
                         return;
                     } else if (iter.current->previous != NULL) {
@@ -325,6 +337,7 @@ void insertSorted(List *list, void *toBeAdded) {
                         node->next = currentElemNode;
                         currentElemNode->previous = node;
                         node->previous->next = node;
+                        list->length++;
                         flag++;
                         return;
                     }
@@ -357,6 +370,7 @@ void insertSorted(List *list, void *toBeAdded) {
                         node->next = currentElemNode;
                         currentElemNode->previous = node;
                         node->previous->next = node;
+                        list->length++;
                         flag++;
                         return;
                     } else if (iter.current->previous != NULL) {
@@ -365,6 +379,7 @@ void insertSorted(List *list, void *toBeAdded) {
                         node->next = currentElemNode;
                         currentElemNode->previous = node;
                         node->previous->next = node;
+                        list->length++;
                         flag++;
                         return;
                     }
@@ -377,6 +392,40 @@ void insertSorted(List *list, void *toBeAdded) {
         }
     }
 }
+
+
+int getLength(List list) {
+    if (listVerification(&list) == 0) {
+        return -1;
+    }
+    return list.length;
+}
+
+
+void *findElement(List list, bool (*customCompare)(const void *first, const void *second), const void *searchRecord) {
+    if (listVerification(&list) == 0) {
+        return NULL;
+    }
+    if (headTailVerification(&list) == 0) {
+        return NULL;
+    }
+    if (customCompare == NULL) {
+        return NULL;
+    }
+    if (searchRecord == NULL) {
+        return NULL;
+    }
+    void *elem;
+    ListIterator iter = createIterator(list);
+    while ((elem = nextElement(&iter)) != NULL) {
+        if (customCompare((const void *) elem, (const void *) searchRecord)) {
+            return elem;
+        }
+    }
+    return NULL;
+}
+
+
 
 
 

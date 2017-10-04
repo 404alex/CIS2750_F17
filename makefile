@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g -I include -std=gnu11 -L bin
 
-all: list parser
+all: list parser clean
 
 list:
 	$(CC) $(CFLAGS) -c src/LinkedListAPI.c -o bin/LinkedListAPI.o

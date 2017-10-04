@@ -1,0 +1,14 @@
+1. Use make command to generate the static library.
+2. the printInfo function will return a pointer, which need to be freed after use.
+3. the printError function will return a string, which do not need to be freed after use.
+4. when use make file, because in the bin folder do not have core file and .so file, so
+   the command will report an error, but it won't affect the generate static library
+   process.
+5. when need compile the main file, you need put -Iinclude, -L bin -lllist, -lcparse
+   flags.
+
+Everything others,  should.. be fine...
+
+Chenxingyu Chen
+0951136
+CIS2750 A1

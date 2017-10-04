@@ -32,6 +32,7 @@ typedef struct listNode{
 typedef struct listHead{
     Node* head;
     Node* tail;
+    int length;
     void (*deleteData)(void* toBeDeleted);
     int (*compare)(const void* first,const void* second);
     char* (*printData)(void* toBePrinted);
@@ -166,13 +167,35 @@ ListIterator createIterator(List list);
 
 
 /** Function that returns the next element of the list through the iterator. 
-* This function returns the head of the list the first time it is called after.
-* the iterator was created. Every subsequent call returns the next element.
+* This function returns the data at head of the list the first time it is called after.
+* the iterator was created. Every subsequent call returns the data associated with the next element.
+* Returns NULL once the end of the iterator is reached.
 *@pre List exists and is valid.  Iterator exists and is valid.
 *@post List remains unchanged.  The iterator points to the next element on the list.
 *@return The data associated with the list element that the iterator pointed to when the function was called.
 *@param iter - an iterator to a list.
 **/
 void* nextElement(ListIterator* iter);
+
+/**Returns the number of elements in the list.
+ *@pre List must exist, but does not have to have elements.
+ *@param list - the list struct.
+ *@return on success: number of eleemnts in the list (0 or more).  on failure: -1 (e.g. list not initlized correctly)
+ **/
+int getLength(List list);
+
+/** Function that searches for an element in the list using a comparator function.
+ * If an element is found, a pointer to the data of that element is returned
+ * Returns NULL if the element is not found.
+ *@pre List exists and is valid.  Comparator function has been provided.
+ *@post List remains unchanged.
+ *@return The data associated with the list element that matches the search criteria.  If element is not found, return NULL.
+ *@param list - a list sruct
+ *@param customCompare - a pointer to comparator fuction for customizing the search
+ *@param searchRecord - a pointer to search data, which contains seach criteria
+ *Note: while the arguments of compare() and searchRecord are all void, it is assumed that records they point to are
+ *      all of the same type - just like arguments to the compare() function in the List struct
+ **/
+void* findElement(List list, bool (*customCompare)(const void* first,const void* second), const void* searchRecord);
 
 #endif
