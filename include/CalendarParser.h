@@ -9,7 +9,7 @@
 #include "LinkedListAPI.h"
 
 //Error codes that indicate what went wrong during parsing
-typedef enum ers {OK, INV_FILE, INV_CAL, INV_VER, DUP_VER, INV_PRODID, DUP_PRODID, INV_EVENT, INV_CREATEDT, INV_ALARM, WRITE_ERROR, OTHER_ERROR, } ErrorCode;
+typedef enum ers {OK, INV_FILE, INV_CAL, INV_VER, DUP_VER, INV_PRODID, DUP_PRODID, INV_EVENT, INV_CREATEDT, OTHER_ERROR} ErrorCode;
 
 //Represents iCalendar Date-time
 typedef struct dt {
@@ -31,7 +31,7 @@ typedef struct prop {
 
 //Represents an iCalendar alarm component
 typedef struct alarm {
-	//Alarm action.  We will assume that the action, even if malformed, does not exceed 200 bytes
+	//Alarm action.  We will assume that the action, even if malformed, does not exceed 1000 bytes
     char    action[200];
 	//Alarm trigger.
     char*   trigger;
@@ -43,7 +43,7 @@ typedef struct alarm {
 typedef struct evt {
 	//Event user ID.  We will assume that the UserID, even if malformed, does not exceed 1000 bytes
 	char 		UID[1000];
-	//Event creation date-time.
+	//Alarm creation date-time.
     DateTime 	creationDateTime;
 	//Additional event properties.  All objects in the list will be of type Property.  It may be empty.
 	List 	    properties;
@@ -52,18 +52,14 @@ typedef struct evt {
 	
 } Event;
 
-
 //Represents an iCalendar object
 typedef struct ical {
 	//iCalendar version
 	float 	version;
 	//Product ID.  We will assume that the UserID, even if malformed, does not exceed 1000 bytes
 	char 	prodID[1000];
-	
-	List events;
-    
-    List properties;
-    
+	//Reference to an event.  We will assume that every calendar object will have an event.
+	Event* event;
 } Calendar;
 
 
@@ -107,25 +103,6 @@ char* printCalendar(const Calendar* obj);
           the descr array using rhe error code enum value as an index
  *@param err - an error code
 **/
-const char* printError(ErrorCode err);
-
-
-/** Function to writing a Calendar object into a file in iCalendar format.
- *@pre Calendar object exists, is not null, and is valid
- *@post Calendar has not been modified in any way, and a file representing the
-        Calendar contents in iCalendar format has been created
- *@return the error code indicating success or the error encountered when parsing the calendar
- *@param obj - a pointer to a Calendar struct
- **/
-ErrorCode writeCalendar(char* fileName, const Calendar* obj);
-
-
-/** Function to validating an existing a Calendar object
- *@pre Calendar object exists and is not null
- *@post Calendar has not been modified in any way
- *@return the error code indicating success or the error encountered when validating the calendar
- *@param obj - a pointer to a Calendar struct
- **/
-ErrorCode validateCalendar(const Calendar* obj);
+const char* printError(ErrorCode err);   
 
 #endif	
