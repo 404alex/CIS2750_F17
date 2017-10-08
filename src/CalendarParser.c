@@ -12,6 +12,9 @@
 #include "help.h"
 
 ErrorCode createCalendar(char *fileName, Calendar **obj) {
+    if (fileName == NULL) {
+        return INV_FILE;
+    }
     if (!fileNameCheck(fileName)) {
         return INV_FILE;
     }
@@ -24,7 +27,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     if (strlen(icsFile) <= 52) {
         free(icsFile);
         fclose(calFile);
-        return INV_FILE;
+        return INV_CAL;
     }
     List listOfToken = initializeList(&printToken, &deleteToken, &compartToken);
     insertTokenizedList(icsFile, &listOfToken);
@@ -195,6 +198,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
 }
 
 void deleteCalendar(Calendar *obj) {
+    if (obj == NULL) { return; }
     clearList(&(obj->events));
     //todo obj's properties should as the next goal
     clearList(&(obj->properties));
@@ -202,6 +206,9 @@ void deleteCalendar(Calendar *obj) {
 }
 
 char *printCalendar(const Calendar *obj) {
+    if (obj == NULL) {
+        return NULL;
+    }
     char *event = malloc(sizeof(char) * 10);
     strcpy(event, "");
     ListIterator iter = createIterator(obj->events);
@@ -213,7 +220,6 @@ char *printCalendar(const Calendar *obj) {
         strcat(event, "\n");
         free(temp);
     }
-
     char *version = malloc(sizeof(char) * 5);
     gcvt(obj->version, 2, version);
     char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
