@@ -71,6 +71,8 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
         switch (contentIndicator(elem)) {
             case 0:
                 obj[index] = (Calendar *) malloc(sizeof(Calendar));
+                obj[index]->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
+                obj[index]->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
                 break;
             case 1:
                 //index++;
@@ -99,7 +101,6 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 free(temp);
                 break;
             case 4:
-                obj[index]->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
                 event = (Event *) malloc(sizeof(Event));
                 event->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
                 event->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
@@ -189,6 +190,24 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                 }
                 insertBack(&(obj[index]->events), event);
                 break;
+            default:
+                description = getDescription(elem);
+                temp = getName(elem);
+                if (temp == NULL) {
+                    continue;
+                }
+                if (description == NULL) {
+                    description = malloc(sizeof(char) * 2);
+                    strcpy(description, "");
+                }
+                aProperty = (Property *) malloc(
+                        sizeof(Property) + (strlen(description) + 2) * sizeof(char));
+                strcpy(aProperty->propDescr, description);
+                strcpy(aProperty->propName, temp);
+                insertBack(&(obj[index]->properties), aProperty);
+                free(temp);
+                free(description);
+                break;
         }
     }
     free(icsFile);
@@ -261,8 +280,34 @@ const char *printError(ErrorCode err) {
             return "One calendar object has more than one product id.\n";
         case OTHER_ERROR:
             return "Some Unknow error. (Do not have enought memory to allocate)\n";
+        case INV_ALARM:
+            return "Alarm is invalid.";
+        case WRITE_ERROR:
+            return "Can not write to file.";
         default:
             return "Nothing";
     }
 }
 
+ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
+    ErrorCode error;
+    if ((error = validateCalendar(obj)) != OK) {
+        return error;
+    }
+    //todo last time write to here;
+    return INV_CAL;
+}
+
+ErrorCode validateCalendar(const Calendar *obj) {
+    if (obj == NULL) {
+        return INV_CAL;
+    }
+    ErrorCode error;
+    if ((error = vCalValidate(obj)) != OK) {
+        return error;
+    }
+    if ((error = vEventValidate(obj->events)) != OK) {
+        return error;
+    }
+    return OK;
+}

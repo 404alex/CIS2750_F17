@@ -191,3 +191,12 @@ void deleteProperties(void *toBeDeleted);
 int compareEvent(const void *first, const void *second);
 
 void deleteEvent(void *toBeDeleted);
+
+/**
+ * if required elements for VCAL is not valid, return false. else return true.
+ * @param obj
+ * @return
+ */
+ErrorCode vCalValidate(const Calendar *obj);
+
+ErrorCode vEventValidate(List event);

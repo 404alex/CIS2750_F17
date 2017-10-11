@@ -222,6 +222,8 @@ ErrorCode fileValidation(List listOfToken) {
     regex_t alarmActionRegex;
     regex_t alarmTriggerRegex;
     regex_t allNoNameRegex;
+    regex_t ianaRegex;
+    regex_t x_compRegex;
     const size_t numMatch = 0;
     char *beginCalPattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
@@ -249,6 +251,8 @@ ErrorCode fileValidation(List listOfToken) {
     char *alarmActionPattern = "^[Aa][Cc][Tt][Ii][Oo][Nn]:[ ]*[A-Za-z]+";
     char *alarmTriPattern = "^[Tt][Rr][Ii][Gg]{2}[Ee][Rr][:;][ ]*.+$";
     char *allNoNamePattern = "^[A-Za-z\\-]+[:;][ ]*$";
+    char *ianaPattern = "^.*;.*:.*$";
+    char *x_compPatter = "^[Xx]\\-";
 
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
     regcomp(&beginCalRegex, beginCalPattern, REG_NOSUB);
@@ -272,6 +276,8 @@ ErrorCode fileValidation(List listOfToken) {
     regcomp(&alarmActionRegex, alarmActionPattern, REG_EXTENDED);
     regcomp(&alarmTriggerRegex, alarmTriPattern, REG_EXTENDED);
     regcomp(&allNoNameRegex, allNoNamePattern, REG_EXTENDED);
+    regcomp(&ianaRegex, ianaPattern, REG_EXTENDED);
+    regcomp(&x_compRegex, x_compPatter, REG_EXTENDED);
     ListIterator iter = createIterator(listOfToken);
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
@@ -294,6 +300,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             return INV_CAL;
         }
         //vevent verified
@@ -310,6 +318,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_CAL;
             }
             veventCount++;
@@ -329,6 +339,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             return INV_EVENT;
         }
 
@@ -347,6 +359,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_EVENT;
             }
             valarmCount++;
@@ -366,6 +380,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             return INV_EVENT;
         }
 
@@ -384,6 +400,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_VER;
             }
             versionCount++;
@@ -401,6 +419,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             return INV_PRODID;
         }
 
@@ -419,6 +439,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_PRODID;
             }
             prodidCount++;
@@ -438,6 +460,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_EVENT;
             }
             uidCount++;
@@ -463,6 +487,8 @@ ErrorCode fileValidation(List listOfToken) {
                 regfree(&alarmActionRegex);
                 regfree(&allNoNameRegex);
                 regfree(&alarmTriggerRegex);
+                regfree(&ianaRegex);
+                regfree(&x_compRegex);
                 return INV_CREATEDT;
             }
             dtStampCount++;
@@ -489,6 +515,8 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             return INV_VER;
         }
         if (regexec(&noNameRegex, elem, numMatch, NULL, 0) == REG_NOMATCH) {
@@ -503,16 +531,21 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             if (valarmCount == 1) {
-                return INV_EVENT;
+                return INV_ALARM;
             }
             if (veventCount == 1) {
                 return INV_EVENT;
             }
             if (vcaleCount == 1) {
                 return INV_CAL;
+            } else {
+                return INV_CAL;
             }
         }
+
 
         if (regexec(&allNoNameRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
             cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
@@ -526,16 +559,51 @@ ErrorCode fileValidation(List listOfToken) {
             regfree(&alarmActionRegex);
             regfree(&allNoNameRegex);
             regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
             if (valarmCount == 1) {
-                return INV_EVENT;
+                return INV_ALARM;
             }
             if (veventCount == 1) {
                 return INV_EVENT;
             }
             if (vcaleCount == 1) {
                 return INV_CAL;
+            } else {
+                return INV_CAL;
             }
         }
+
+
+        if (regexec(&ianaRegex, elem, numMatch, NULL, 0) != REG_NOMATCH ||
+            regexec(&x_compRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+            cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
+                       &uidRegex,
+                       &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
+                       &dtendRegex,
+                       &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+            regfree(&prodidNoneRegex);
+            regfree(&versionNoneRegex);
+            regfree(&noNameRegex);
+            regfree(&alarmActionRegex);
+            regfree(&allNoNameRegex);
+            regfree(&alarmTriggerRegex);
+            regfree(&ianaRegex);
+            regfree(&x_compRegex);
+            if (valarmCount == 1) {
+                return INV_ALARM;
+            }
+            if (veventCount == 1) {
+                return INV_EVENT;
+            }
+            if (vcaleCount == 1) {
+                return INV_CAL;
+            } else {
+                return INV_CAL;
+            }
+        }
+
+
         if (regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH ||
             regexec(&dtstartRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH) {
             dtstartCount++;
@@ -552,6 +620,8 @@ ErrorCode fileValidation(List listOfToken) {
     regfree(&alarmActionRegex);
     regfree(&allNoNameRegex);
     regfree(&alarmTriggerRegex);
+    regfree(&ianaRegex);
+    regfree(&x_compRegex);
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
                &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
                &durationRegex, &alarmBeginRegex, &alarmEndRegex);
@@ -612,16 +682,14 @@ ErrorCode fileValidation(List listOfToken) {
         return INV_EVENT;
     }
     if (alarmActionCount != alarmCount) {
-        return INV_EVENT;
+        return INV_ALARM;
     }
     if (alarmTriggerCount != alarmCount) {
-        return INV_EVENT;
+        return INV_ALARM;
     }
     return OK;
 
 }
-
-
 
 
 void cleanRegex(regex_t *beginCalRegex, regex_t *endCalRegex, regex_t *beginEveRegex, regex_t *endEveRegex,
@@ -1268,8 +1336,7 @@ int compareProperties(const void *first, const void *second) {
     }
     Property *Property1 = (Property *) first;
     Property *Property2 = (Property *) second;
-    return strcmp(Property1->propName, Property2->propName);
-
+    return strcasecmp(Property1->propName, Property2->propName);
 }
 
 void deleteProperties(void *toBeDeleted) {
@@ -1298,3 +1365,262 @@ void deleteEvent(void *toBeDeleted) {
     clearList(&delete->alarms);
     free(delete);
 }
+
+/**
+ * travel all the properties in calendar object, find the property name and return the count of the property name.
+ * if find some properties which name or value is empty string. return -1
+ * @param obj calendar object
+ * @param aProperty proprety which have name that need to find.
+ * @return
+ */
+int propertyDupFind(List properties, const Property *aProperty) {
+    ListIterator iter = createIterator(properties);
+    void *elem;
+    int findCount = 0;
+    while ((elem = nextElement(&iter)) != NULL) {
+        Property *temp = (Property *) elem;
+        if (strlen(temp->propName) == 0 || strlen(temp->propDescr) == 0) {
+            return -1;
+        }
+        if (properties.compare(aProperty, elem) == 0) {
+            findCount++;
+        }
+    }
+    return findCount;
+}
+
+//todo add x-prop and iana-prop validate
+ErrorCode vCalValidate(const Calendar *obj) {
+    if (obj->prodID == NULL) {
+        return INV_CAL;
+    }
+    if (strlen(obj->prodID) <= 0) {
+        return INV_PRODID;
+    }
+    if (obj->version <= 0) {
+        return INV_VER;
+    }
+    if (obj->events.length == 0) {
+        return INV_CAL;
+    }
+    //prodid dup valid
+    Property *aProperty = malloc(sizeof(Property));
+    strcpy(aProperty->propName, "prodid");
+    if (propertyDupFind(obj->properties, aProperty) != 0) {
+        obj->properties.deleteData(aProperty);
+        return DUP_PRODID;
+    } else if (propertyDupFind(obj->properties, aProperty) == -1) {
+        obj->properties.deleteData(aProperty);
+        return INV_CAL;
+    }
+    strcpy(aProperty->propName, "version");
+    if (propertyDupFind(obj->properties, aProperty) != 0) {
+        obj->properties.deleteData(aProperty);
+        return DUP_VER;
+    }
+    strcpy(aProperty->propName, "calscale");
+    if (propertyDupFind(obj->properties, aProperty) > 1) {
+        obj->properties.deleteData(aProperty);
+        return INV_CAL;
+    }
+    strcpy(aProperty->propName, "method");
+    if (propertyDupFind(obj->properties, aProperty) > 1) {
+        obj->properties.deleteData(aProperty);
+        return INV_CAL;
+    }
+    obj->properties.deleteData(aProperty);
+    return OK;
+}
+
+//todo add x-prop and iana-prop validate
+ErrorCode vAlarmValidate(List alarm) {
+    void *elem;
+    ListIterator iter = createIterator(alarm);
+    while ((elem = nextElement(&iter)) != NULL) {
+        Alarm *temp = (Alarm *) elem;
+        if (strlen(temp->action) == 0) {
+            return INV_ALARM;
+        }
+        if (temp->trigger == NULL || strlen(temp->trigger) == 0) {
+            return INV_ALARM;
+        }
+        Property *aProperty = malloc(sizeof(Property));
+        strcpy(aProperty->propName, "action");
+        if (propertyDupFind(temp->properties, aProperty) != 0) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        } else if (propertyDupFind(temp->properties, aProperty) == -1) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        }
+        strcpy(aProperty->propName, "trigger");
+        if (propertyDupFind(temp->properties, aProperty) != 0) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        }
+        int durationCount = 0;
+        int repeatCount = 0;
+        strcpy(aProperty->propName, "duration");
+        if ((durationCount = propertyDupFind(temp->properties, aProperty)) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        }
+        strcpy(aProperty->propName, "repeat");
+        if ((repeatCount = propertyDupFind(temp->properties, aProperty)) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        }
+        if (durationCount != repeatCount) {
+            return INV_ALARM;
+        }
+
+        if (strcasecmp(temp->action, "display") == 0) {
+            strcpy(aProperty->propName, "description");
+            if (propertyDupFind(temp->properties, aProperty) != 1) {
+                temp->properties.deleteData(aProperty);
+                return INV_ALARM;
+            }
+        } else if (strcasecmp(temp->action, "email") == 0) {
+            strcpy(aProperty->propName, "description");
+            if (propertyDupFind(temp->properties, aProperty) != 1) {
+                temp->properties.deleteData(aProperty);
+                return INV_ALARM;
+            }
+            strcpy(aProperty->propName, "summary");
+            if (propertyDupFind(temp->properties, aProperty) != 1) {
+                temp->properties.deleteData(aProperty);
+                return INV_ALARM;
+            }
+
+            strcpy(aProperty->propName, "attendee");
+            if (propertyDupFind(temp->properties, aProperty) < 1) {
+                temp->properties.deleteData(aProperty);
+                return INV_ALARM;
+            }
+        }
+        temp->properties.deleteData(aProperty);
+    }
+    return OK;
+}
+
+
+//todo add x-prop and iana-prop validate
+ErrorCode vEventValidate(List event) {
+    void *elem;
+    ListIterator iter = createIterator(event);
+    while ((elem = nextElement(&iter)) != NULL) {
+        Event *temp = (Event *) elem;
+        if (strlen(temp->UID) == 0) {
+            return INV_EVENT;
+        }
+        if (strlen(temp->creationDateTime.date) != 8 || strlen(temp->creationDateTime.time) != 6) {
+            return INV_CREATEDT;
+        }
+        Property *aProperty = malloc(sizeof(Property));
+        strcpy(aProperty->propName, "uid");
+        if (propertyDupFind(temp->properties, aProperty) != 0) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        } else if (propertyDupFind(temp->properties, aProperty) == -1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "dtstamp");
+        if (propertyDupFind(temp->properties, aProperty) != 0) {
+            temp->properties.deleteData(aProperty);
+            return INV_CREATEDT;
+        }
+        strcpy(aProperty->propName, "dtstart");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "class");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "created");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "description");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "geo");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "last-mod");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "location");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "organizer");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "priority");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "seq");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "status");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "summary");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "transp");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "url");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "recurid");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        strcpy(aProperty->propName, "rrule");
+        if (propertyDupFind(temp->properties, aProperty) > 1) {
+            temp->properties.deleteData(aProperty);
+            return INV_EVENT;
+        }
+        if (vAlarmValidate(temp->alarms) != OK) {
+            temp->properties.deleteData(aProperty);
+            return INV_ALARM;
+        }
+        temp->properties.deleteData(aProperty);
+    }
+    return OK;
+}
+
+
+
+
+
+
