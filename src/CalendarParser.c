@@ -219,7 +219,6 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
 void deleteCalendar(Calendar *obj) {
     if (obj == NULL) { return; }
     clearList(&(obj->events));
-    //todo obj's properties should as the next goal
     clearList(&(obj->properties));
     free(obj);
 }
