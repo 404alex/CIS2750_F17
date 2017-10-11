@@ -7,19 +7,16 @@
 
 int main() {
     char *string = malloc(sizeof(char) * 100);
-    strcpy(string, "testCalEvtPropAlm.ics");
+    strcpy(string, "test.ics");
     Calendar *obj = NULL;
     ErrorCode error = createCalendar(string, &obj);
     printf(printError(error));
-    if (error == OK) {
-        char *printInfo = printCalendar(obj);
-        printf(printInfo);
-        free(printInfo);
-    }
+
+    printf(printError(validateCalendar(obj)));
 
     free(string);
-    ErrorCode error1 = validateCalendar(obj);
-    printf(printError(error1));
+    error = writeCalendar("test.ics", obj);
+    printf(printError(error));
     deleteCalendar(obj);
     return 0;
 }

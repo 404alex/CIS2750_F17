@@ -200,3 +200,7 @@ void deleteEvent(void *toBeDeleted);
 ErrorCode vCalValidate(const Calendar *obj);
 
 ErrorCode vEventValidate(List event);
+
+char *writeAlarm(void *toBePrinted);
+
+char *writeEvent(void *toBePrinted);

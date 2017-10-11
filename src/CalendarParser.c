@@ -235,7 +235,7 @@ char *printCalendar(const Calendar *obj) {
         char *temp = obj->events.printData(elem);
         event = realloc(event, sizeof(char) * (strlen(event) + strlen(temp) + 7));
         strcat(event, temp);
-        strcat(event, "\n");
+        strcat(event, "\r\n");
         free(temp);
     }
     char *version = malloc(sizeof(char) * 5);
@@ -245,12 +245,43 @@ char *printCalendar(const Calendar *obj) {
     strcat(string, version);
     strcat(string, ", prodID = ");
     strcat(string, obj->prodID);
-    strcat(string, "\nEvent\n");
+    strcat(string, "\r\nEvent\r\n");
     strcat(string, event);
     free(event);
     free(version);
     return string;
 }
+
+
+char *writeCalendarString(const Calendar *obj) {
+    if (obj == NULL) {
+        return NULL;
+    }
+    char *event = malloc(sizeof(char) * 10);
+    strcpy(event, "");
+    ListIterator iter = createIterator(obj->events);
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = writeEvent(elem);
+        event = realloc(event, sizeof(char) * (strlen(event) + strlen(temp) + 7));
+        strcat(event, temp);
+        strcat(event, "\r\n");
+        free(temp);
+    }
+    char *version = malloc(sizeof(char) * 5);
+    gcvt(obj->version, 2, version);
+    char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
+    strcpy(string, "BEGIN:VCALENDAR\r\nVERSION:");
+    strcat(string, version);
+    strcat(string, "\r\nPRODID:");
+    strcat(string, obj->prodID);
+    strcat(string, event);
+    strcat(string, "END:VCALENDAR");
+    free(event);
+    free(version);
+    return string;
+}
+
 
 /**
  * Print readable error message. return string, do not need free!
@@ -293,8 +324,26 @@ ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
     if ((error = validateCalendar(obj)) != OK) {
         return error;
     }
+
+    if (!fileNameCheck(fileName)) {
+        return INV_FILE;
+    }
+    FILE *test = fopen(fileName, "r");
+    if (test != NULL) {
+        fclose(test);
+        return INV_FILE;
+    }
     //todo last time write to here;
-    return INV_CAL;
+    char *needWriteString = writeCalendarString(obj);
+    FILE *file = fopen(fileName, "w");
+    int length = fwrite(needWriteString, sizeof(char), strlen(needWriteString), file);
+    free(needWriteString);
+    fclose(file);
+    if (length <= 0) {
+        return WRITE_ERROR;
+    } else {
+        return OK;
+    }
 }
 
 ErrorCode validateCalendar(const Calendar *obj) {

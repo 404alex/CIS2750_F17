@@ -229,7 +229,7 @@ ErrorCode fileValidation(List listOfToken) {
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr][ ]*$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt][ ]*$";
-    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.[0-9]+[ ]*$";
+    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]*[ ]*$";
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *prodidNonePattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*$";
 
@@ -794,7 +794,7 @@ int contentIndicator(void *elem) {
     char *endCalPattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Cc][Aa][Ll][Ee][Nn][Dd][Aa][Rr]$";
     char *beginEvePattern = "^[Bb][Ee][Gg][Ii][Nn]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
     char *endEvePattern = "^[Ee][Nn][Dd]:[ ]*[Vv][Ee][Vv][Ee][Nn][Tt]$";
-    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]+$";
+    char *versionPattern = "^[Vv][Ee][Rr][Ss][Ii][Oo][Nn]:[ ]*[0-9]+\\.?[0-9]*$";
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
@@ -952,7 +952,7 @@ char *printEvent(void *toBePrinted) {
         char *temp = event->properties.printData(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
         strcat(property, temp);
-        strcat(property, "\n");
+        strcat(property, "\r\n");
         free(temp);
     }
 
@@ -964,7 +964,7 @@ char *printEvent(void *toBePrinted) {
         char *temp = event->alarms.printData(elem2);
         alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
         strcat(alarms, temp);
-        strcat(alarms, "\n");
+        strcat(alarms, "\r\n");
         free(temp);
     }
     int lengthOfCreationDT =
@@ -994,6 +994,76 @@ char *printEvent(void *toBePrinted) {
     free(creationDateTime);
     return string;
 }
+char *writeProperty(void *toBePrinted) {
+    if (toBePrinted == NULL) {
+        return NULL;
+    }
+    Property *aProperty = (Property *) toBePrinted;
+    int length = strlen(aProperty->propName) + strlen(aProperty->propDescr) + 5;
+    char *string = malloc(sizeof(char) * length);
+    strcpy(string, "");
+    strcat(string, aProperty->propName);
+    strcat(string, ":");
+    strcat(string, aProperty->propDescr);
+    return string;
+}
+
+
+char *writeEvent(void *toBePrinted) {
+    Event *event = (Event *) toBePrinted;
+    if (event == NULL) {
+        return NULL;
+    }
+    ListIterator iter = createIterator(event->properties);
+    char *property = malloc(sizeof(char) * 20);
+    strcpy(property, "");
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = writeProperty(elem);
+        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
+        strcat(property, temp);
+        strcat(property, "\r\n");
+        free(temp);
+    }
+
+    ListIterator iter2 = createIterator(event->alarms);
+    char *alarms = malloc(sizeof(char) * 20);
+    strcpy(alarms, "");
+    void *elem2;
+    while ((elem2 = nextElement(&iter2)) != NULL) {
+        char *temp = writeAlarm(elem2);
+        alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
+        strcat(alarms, temp);
+        strcat(alarms, "\r\n");
+        free(temp);
+    }
+    int lengthOfCreationDT =
+            strlen(event->creationDateTime.date) + strlen(event->creationDateTime.time) + 30;
+    char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
+    strcpy(creationDateTime, event->creationDateTime.date);
+    strcat(creationDateTime, "T");
+    strcat(creationDateTime, event->creationDateTime.time);
+    if (event->creationDateTime.UTC == true) {
+        strcat(creationDateTime, "Z");
+    }
+    char *string = malloc(sizeof(char) *
+                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
+                           300));
+    strcpy(string, "\r\nBEGIN:VEVENT\r\n");
+    strcat(string,"UID:");
+    strcat(string, event->UID);
+    strcat(string, "\r\nDTSTAMP:");
+    strcat(string, creationDateTime);
+    strcat(string,"\r\n");
+    strcat(string, property);
+    strcat(string, alarms);
+    strcat(string,"END:VEVENT");
+    free(property);
+    free(alarms);
+    free(creationDateTime);
+    return string;
+}
+
 
 
 float getVersionNumber(void *elem) {
@@ -1002,7 +1072,7 @@ float getVersionNumber(void *elem) {
     }
     char *num = (char *) elem;
     regex_t versionNumRegex;
-    char *versionNumPattern = "[0-9]+\\.?[0-9]+";
+    char *versionNumPattern = "[0-9]+\\.?[0-9]*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&versionNumRegex, versionNumPattern, REG_EXTENDED);
@@ -1283,19 +1353,51 @@ char *printAlarm(void *toBePrinted) {
         char *temp = alarm->properties.printData(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
         strcat(property, temp);
-        strcat(property, "\n");
+        strcat(property, "\r\n");
         free(temp);
     }
     char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
     strcpy(string, "\t\tAction: ");
     strcat(string, alarm->action);
-    strcat(string, "\n\t\tTrigger: ");
+    strcat(string, "\r\n\t\tTrigger: ");
     strcat(string, alarm->trigger);
-    strcat(string, "\n\t\tProperties:\n");
+    strcat(string, "\r\n\t\tProperties:\r\n");
     strcat(string, property);
     free(property);
     return string;
 }
+
+
+
+
+char *writeAlarm(void *toBePrinted) {
+    if (toBePrinted == NULL) {
+        return NULL;
+    }
+    Alarm *alarm = (Alarm *) toBePrinted;
+    ListIterator iter = createIterator(alarm->properties);
+    char *property = malloc(sizeof(char) * 25);
+    strcpy(property, "\r\nBEGIN:VALARM\r\n");
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = writeProperty(elem);
+        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
+        strcat(property, temp);
+        strcat(property, "\r\n");
+        free(temp);
+    }
+    char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
+    strcpy(string, "ACTION:");
+    strcat(string, alarm->action);
+    strcat(string, "\r\nTRIGGER:");
+    strcat(string, alarm->trigger);
+    strcat(string, property);
+    strcat(string, "END:VALARM");
+    free(property);
+    return string;
+}
+
+
 
 int comparAlarm(const void *first, const void *second) {
     if (first == NULL || second == NULL) {
@@ -1329,6 +1431,8 @@ char *printProperties(void *toBePrinted) {
     strcat(string, aProperty->propDescr);
     return string;
 }
+
+
 
 int compareProperties(const void *first, const void *second) {
     if (first == NULL || second == NULL) {
