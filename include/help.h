@@ -204,3 +204,5 @@ ErrorCode vEventValidate(List event);
 char *writeAlarm(void *toBePrinted);
 
 char *writeEvent(void *toBePrinted);
+
+char* foldWritenString(char *string);

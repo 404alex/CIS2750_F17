@@ -180,6 +180,24 @@ bool unFoldData(List *listOfToken) {
             listOfToken->deleteData(previousData);
             free(string);
         }
+        if (strncmp("\t", elem, 1) == 0) {
+            if (iter.current == NULL) {
+                return false;
+            }
+            char *string = deleteDataFromList(listOfToken, elem);
+            if (iter.current->previous == NULL) {
+                free(string);
+                return false;
+            }
+            char *previousData = iter.current->previous->data;
+            int size = strlen(previousData) + strlen(string) + 5;
+            char *newData = malloc(sizeof(char) * size);
+            strcpy(newData, previousData);
+            strcat(newData, string + 1);
+            iter.current->previous->data = newData;
+            listOfToken->deleteData(previousData);
+            free(string);
+        }
     }
     return true;
 }
@@ -251,7 +269,7 @@ ErrorCode fileValidation(List listOfToken) {
     char *alarmActionPattern = "^[Aa][Cc][Tt][Ii][Oo][Nn]:[ ]*[A-Za-z]+";
     char *alarmTriPattern = "^[Tt][Rr][Ii][Gg]{2}[Ee][Rr][:;][ ]*.+$";
     char *allNoNamePattern = "^[A-Za-z\\-]+[:;][ ]*$";
-    char *ianaPattern = "^.*;.*:.*$";
+    char *ianaPattern = "^[A-Za-z\\-]+;.*:.*$";
     char *x_compPatter = "^[Xx]\\-";
 
     regcomp(&endCalRegex, endCalPattern, REG_NOSUB);
@@ -994,6 +1012,7 @@ char *printEvent(void *toBePrinted) {
     free(creationDateTime);
     return string;
 }
+
 char *writeProperty(void *toBePrinted) {
     if (toBePrinted == NULL) {
         return NULL;
@@ -1050,20 +1069,19 @@ char *writeEvent(void *toBePrinted) {
                           (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
                            300));
     strcpy(string, "\r\nBEGIN:VEVENT\r\n");
-    strcat(string,"UID:");
+    strcat(string, "UID:");
     strcat(string, event->UID);
     strcat(string, "\r\nDTSTAMP:");
     strcat(string, creationDateTime);
-    strcat(string,"\r\n");
+    strcat(string, "\r\n");
     strcat(string, property);
     strcat(string, alarms);
-    strcat(string,"END:VEVENT");
+    strcat(string, "END:VEVENT");
     free(property);
     free(alarms);
     free(creationDateTime);
     return string;
 }
-
 
 
 float getVersionNumber(void *elem) {
@@ -1368,8 +1386,6 @@ char *printAlarm(void *toBePrinted) {
 }
 
 
-
-
 char *writeAlarm(void *toBePrinted) {
     if (toBePrinted == NULL) {
         return NULL;
@@ -1396,7 +1412,6 @@ char *writeAlarm(void *toBePrinted) {
     free(property);
     return string;
 }
-
 
 
 int comparAlarm(const void *first, const void *second) {
@@ -1431,7 +1446,6 @@ char *printProperties(void *toBePrinted) {
     strcat(string, aProperty->propDescr);
     return string;
 }
-
 
 
 int compareProperties(const void *first, const void *second) {
@@ -1724,7 +1738,28 @@ ErrorCode vEventValidate(List event) {
 }
 
 
-
-
+char* foldWritenString(char *string) {
+    if (string == NULL) {
+        return NULL;
+    }
+    int charCount = 0;
+    for (int i = 0; i < strlen(string); ++i) {
+        if (strncmp(string + i, "\r\n", 2) == 0) {
+            charCount = 0;
+        }
+        if (charCount == 75) {
+            char *temp = malloc(sizeof(char) * (strlen(string) + 3));
+            strncpy(temp, string, i);
+            strcat(temp, "\r\n ");
+            strcat(temp, string + i);
+            free(string);
+            string = temp;
+            charCount = 0;
+            i += 2;
+        }
+        charCount++;
+    }
+    return string;
+}
 
 

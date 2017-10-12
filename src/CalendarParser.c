@@ -335,6 +335,9 @@ ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
     }
     //todo last time write to here;
     char *needWriteString = writeCalendarString(obj);
+    needWriteString = foldWritenString(needWriteString);
+
+
     FILE *file = fopen(fileName, "w");
     int length = fwrite(needWriteString, sizeof(char), strlen(needWriteString), file);
     free(needWriteString);

@@ -7,7 +7,7 @@
 
 int main() {
     char *string = malloc(sizeof(char) * 100);
-    strcpy(string, "test.ics");
+    strcpy(string, "testCalEvtPropAlm.ics");
     Calendar *obj = NULL;
     ErrorCode error = createCalendar(string, &obj);
     printf(printError(error));
