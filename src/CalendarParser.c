@@ -213,6 +213,11 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     free(icsFile);
     fclose(calFile);
     clearList(&listOfToken);
+    ErrorCode errorCode;
+    if ((errorCode = validateCalendar(obj[index])) != OK) {
+        deleteCalendar(obj[index]);
+        return errorCode;
+    }
     return OK;
 }
 
@@ -275,6 +280,7 @@ char *writeCalendarString(const Calendar *obj) {
     strcat(string, version);
     strcat(string, "\r\nPRODID:");
     strcat(string, obj->prodID);
+    strcat(string, "\r\n");
     strcat(string, event);
     strcat(string, "END:VCALENDAR");
     free(event);

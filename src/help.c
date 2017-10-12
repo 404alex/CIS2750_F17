@@ -1068,7 +1068,7 @@ char *writeEvent(void *toBePrinted) {
     char *string = malloc(sizeof(char) *
                           (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
                            300));
-    strcpy(string, "\r\nBEGIN:VEVENT\r\n");
+    strcpy(string, "BEGIN:VEVENT\r\n");
     strcat(string, "UID:");
     strcat(string, event->UID);
     strcat(string, "\r\nDTSTAMP:");
@@ -1547,6 +1547,14 @@ ErrorCode vCalValidate(const Calendar *obj) {
         return INV_CAL;
     }
     obj->properties.deleteData(aProperty);
+    void *elem;
+    ListIterator iter = createIterator(obj->properties);
+    while ((elem = nextElement(&iter)) != NULL) {
+        Property *aProperty1 = (Property *) elem;
+        if (strcasecmp(aProperty1->propName, "calscale") != 0 && strcasecmp(aProperty1->propName, "method") != 0) {
+            return INV_CAL;
+        }
+    }
     return OK;
 }
 
@@ -1616,7 +1624,22 @@ ErrorCode vAlarmValidate(List alarm) {
                 return INV_ALARM;
             }
         }
+
         temp->properties.deleteData(aProperty);
+        void *elem2;
+        ListIterator iter2 = createIterator(temp->properties);
+        while ((elem2 = nextElement(&iter2)) != NULL) {
+            Property *aProperty1 = (Property *) elem2;
+            if (strcasecmp(aProperty1->propName, "REPEAT") != 0
+                && strcasecmp(aProperty1->propName, "ATTENDEE") != 0
+                && strcasecmp(aProperty1->propName, "DURATION") != 0
+                && strcasecmp(aProperty1->propName, "SUMMARY") != 0
+                && strcasecmp(aProperty1->propName, "DESCRIPTION") != 0
+                && strcasecmp(aProperty1->propName, "ATTACH") != 0) {
+                return INV_EVENT;
+            }
+        }
+
     }
     return OK;
 }
@@ -1733,31 +1756,67 @@ ErrorCode vEventValidate(List event) {
             return INV_ALARM;
         }
         temp->properties.deleteData(aProperty);
+        void *elem2;
+        ListIterator iter2 = createIterator(temp->properties);
+        while ((elem2 = nextElement(&iter2)) != NULL) {
+            Property *aProperty1 = (Property *) elem2;
+            if (strcasecmp(aProperty1->propName, "attach") != 0
+                && strcasecmp(aProperty1->propName, "CATEGORIES") != 0
+                && strcasecmp(aProperty1->propName, "CLASS") != 0
+                && strcasecmp(aProperty1->propName, "COMMENT") != 0
+                && strcasecmp(aProperty1->propName, "DESCRIPTION") != 0
+                && strcasecmp(aProperty1->propName, "GEO") != 0
+                && strcasecmp(aProperty1->propName, "LOCATION") != 0
+                && strcasecmp(aProperty1->propName, "PRIORITY") != 0
+                && strcasecmp(aProperty1->propName, "RESOURCES") != 0
+                && strcasecmp(aProperty1->propName, "STATUS") != 0
+                && strcasecmp(aProperty1->propName, "SUMMARY") != 0
+                && strcasecmp(aProperty1->propName, "DTEND") != 0
+                && strcasecmp(aProperty1->propName, "DTSTART") != 0
+                && strcasecmp(aProperty1->propName, "DURATION") != 0
+                && strcasecmp(aProperty1->propName, "TRANSP") != 0
+                && strcasecmp(aProperty1->propName, "CONTACT") != 0
+                && strcasecmp(aProperty1->propName, "ORGANIZER") != 0
+                && strcasecmp(aProperty1->propName, "RECURRENCE-ID") != 0
+                && strcasecmp(aProperty1->propName, "RELATED-TO") != 0
+                && strcasecmp(aProperty1->propName, "URL") != 0
+                && strcasecmp(aProperty1->propName, "EXDATE") != 0
+                && strcasecmp(aProperty1->propName, "RDATE") != 0
+                && strcasecmp(aProperty1->propName, "RRULE") != 0
+                && strcasecmp(aProperty1->propName, "RDATE") != 0
+                && strcasecmp(aProperty1->propName, "CREATED") != 0
+                && strcasecmp(aProperty1->propName, "LAST-MODIFIED") != 0
+                && strcasecmp(aProperty1->propName, "SEQUENCE") != 0) {
+                return INV_EVENT;
+            }
+        }
     }
     return OK;
 }
 
 
-char* foldWritenString(char *string) {
+char *foldWritenString(char *string) {
     if (string == NULL) {
         return NULL;
     }
     int charCount = 0;
-    for (int i = 0; i < strlen(string); ++i) {
+    char *temp;
+    for (int i = 0; i < (strlen(string) - 5); ++i) {
+        charCount++;
         if (strncmp(string + i, "\r\n", 2) == 0) {
             charCount = 0;
         }
-        if (charCount == 75) {
-            char *temp = malloc(sizeof(char) * (strlen(string) + 3));
-            strncpy(temp, string, i);
+        if (charCount == 76) {
+            temp = malloc(sizeof(char) * (strlen(string) + 4));
+            strcpy(temp, "");
+            strncat(temp, string, i);
             strcat(temp, "\r\n ");
             strcat(temp, string + i);
             free(string);
             string = temp;
             charCount = 0;
-            i += 2;
+            i++;
         }
-        charCount++;
     }
     return string;
 }
