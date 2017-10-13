@@ -1822,4 +1822,36 @@ char *foldWritenString(char *string) {
 }
 
 
+char *writeCalendarString(const Calendar *obj) {
+    if (obj == NULL) {
+        return NULL;
+    }
+    char *event = malloc(sizeof(char) * 10);
+    strcpy(event, "");
+    ListIterator iter = createIterator(obj->events);
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = writeEvent(elem);
+        event = realloc(event, sizeof(char) * (strlen(event) + strlen(temp) + 7));
+        strcat(event, temp);
+        strcat(event, "\r\n");
+        free(temp);
+    }
+    char *version = malloc(sizeof(char) * 5);
+    gcvt(obj->version, 2, version);
+    char *string = malloc(sizeof(char) * (strlen(event) + strlen(obj->prodID) + strlen(version) + 50));
+    strcpy(string, "BEGIN:VCALENDAR\r\nVERSION:");
+    strcat(string, version);
+    strcat(string, "\r\nPRODID:");
+    strcat(string, obj->prodID);
+    strcat(string, "\r\n");
+    strcat(string, event);
+    strcat(string, "END:VCALENDAR");
+    free(event);
+    free(version);
+    return string;
+}
+
+
+
 

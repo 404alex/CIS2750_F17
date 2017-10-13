@@ -205,4 +205,6 @@ char *writeAlarm(void *toBePrinted);
 
 char *writeEvent(void *toBePrinted);
 
-char* foldWritenString(char *string);
+char *foldWritenString(char *string);
+
+char *writeCalendarString(const Calendar *obj);
