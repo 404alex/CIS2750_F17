@@ -1822,3 +1822,4 @@ char *foldWritenString(char *string) {
 }
 
 
+

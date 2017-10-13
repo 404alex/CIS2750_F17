@@ -334,11 +334,11 @@ ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
     if (!fileNameCheck(fileName)) {
         return INV_FILE;
     }
-    FILE *test = fopen(fileName, "r");
-    if (test != NULL) {
-        fclose(test);
-        return INV_FILE;
-    }
+//    FILE *test = fopen(fileName, "r");
+//    if (test != NULL) {
+//        fclose(test);
+//        return INV_FILE;
+//    }
     //todo last time write to here;
     char *needWriteString = writeCalendarString(obj);
     needWriteString = foldWritenString(needWriteString);
