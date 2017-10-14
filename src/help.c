@@ -1114,7 +1114,7 @@ char *getProdid(void *elem) {
     }
     char *prodid = (char *) elem;
     regex_t prodidRegex;
-    char *prodidPartten = "[0-9/\\\\\\.\\-]{1}.*";
+    char *prodidPartten = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*";
     const size_t numMatch = 1;
     regmatch_t strMatch[1];
     regcomp(&prodidRegex, prodidPartten, REG_EXTENDED);
@@ -1122,8 +1122,8 @@ char *getProdid(void *elem) {
         regfree(&prodidRegex);
         return NULL;
     } else {
-        char *string = malloc(sizeof(char) * (strMatch[0].rm_eo - strMatch[0].rm_so + 5));
-        sprintf(string, "%.*s", (strMatch[0].rm_eo - strMatch[0].rm_so), (prodid + strMatch[0].rm_so));
+        char *string = malloc(sizeof(char) * (strlen(prodid) - strMatch[0].rm_eo + 5));
+        sprintf(string, "%.*s", (int) (strlen(prodid) - strMatch[0].rm_eo), (prodid + strMatch[0].rm_eo));
         regfree(&prodidRegex);
         return string;
     }
@@ -1392,23 +1392,23 @@ char *writeAlarm(void *toBePrinted) {
     }
     Alarm *alarm = (Alarm *) toBePrinted;
     ListIterator iter = createIterator(alarm->properties);
-    char *property = malloc(sizeof(char) * 25);
-    strcpy(property, "\r\nBEGIN:VALARM\r\n");
+    char *property = malloc(sizeof(char) * 50);
+    strcpy(property, "");
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
         char *temp = writeProperty(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
-        strcat(property, temp);
         strcat(property, "\r\n");
+        strcat(property, temp);
         free(temp);
     }
     char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
-    strcpy(string, "ACTION:");
+    strcpy(string, "BEGIN:VALARM\r\nACTION:");
     strcat(string, alarm->action);
     strcat(string, "\r\nTRIGGER:");
     strcat(string, alarm->trigger);
     strcat(string, property);
-    strcat(string, "END:VALARM");
+    strcat(string, "\r\nEND:VALARM");
     free(property);
     return string;
 }
@@ -1428,9 +1428,13 @@ void deleteAlarm(void *toBeDeleted) {
         return;
     }
     Alarm *alarm = (Alarm *) toBeDeleted;
-    free(alarm->trigger);
+    if (alarm->trigger != NULL) {
+        free(alarm->trigger);
+    }
     clearList(&alarm->properties);
-    free(alarm);
+    if (alarm != NULL) {
+        free(alarm);
+    }
 }
 
 char *printProperties(void *toBePrinted) {
@@ -1481,7 +1485,9 @@ void deleteEvent(void *toBeDeleted) {
     Event *delete = (Event *) toBeDeleted;
     clearList(&delete->properties);
     clearList(&delete->alarms);
-    free(delete);
+    if (delete != NULL) {
+        free(delete);
+    }
 }
 
 /**

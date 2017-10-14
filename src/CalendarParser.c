@@ -131,6 +131,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
                             break;
                         case 9:
                             alarmTemp = (Alarm *) malloc(sizeof(Alarm));
+                            alarmTemp->trigger = NULL;
                             alarmTemp->properties = initializeList(&printProperties, &deleteProperties,
                                                                    &compareProperties);
                             while ((elem = nextElement(&iter)) != NULL && !isEndAlarm(elem)) {
@@ -256,7 +257,6 @@ char *printCalendar(const Calendar *obj) {
     free(version);
     return string;
 }
-
 
 
 /**

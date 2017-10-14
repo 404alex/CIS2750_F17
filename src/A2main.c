@@ -12,9 +12,9 @@ int main() {
     char input[100];
     char longInput[10000];
     Calendar *obj = NULL;
-    ErrorCode error;
-    Property *tempProperty;
-    char *tempDisplay;
+    ErrorCode error = OK;
+    Property *tempProperty = NULL;
+    char *tempDisplay = NULL;
     bool fileError = false;
     bool inputError = false;
     regex_t floatRegex;
@@ -23,8 +23,8 @@ int main() {
     char *onlySpacePattern = "^[ ]*$";
     regex_t numberOnlyRegex;
     char *numOnlyPattern = "^[0-9]+$";
-    Event *tempEvent;
-    Alarm *tempAlarm;
+    Event *tempEvent = NULL;
+    Alarm *tempAlarm = NULL;
     regcomp(&floatRegex, floatPattern, REG_EXTENDED);
     regcomp(&onlySpaceRegex, onlySpacePattern, REG_EXTENDED);
     regcomp(&numberOnlyRegex, numOnlyPattern, REG_EXTENDED);
@@ -192,6 +192,7 @@ int main() {
                 } while (inputError);
                 strcpy(tempEvent->UID, longInput);
                 tempAlarm = (Alarm *) malloc(sizeof(Alarm));
+                tempAlarm->trigger = NULL;
                 tempAlarm->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
                 do {
                     inputError = false;
@@ -219,7 +220,7 @@ int main() {
                     tempProperty = (Property *) malloc(sizeof(Property) + (strlen(longInput) + 10) * sizeof(char));
                     strcpy(tempProperty->propName, "DESCRIPTION");
                     strcpy(tempProperty->propDescr, longInput);
-                    insertBack(&(tempAlarm->properties),tempProperty);
+                    insertBack(&(tempAlarm->properties), tempProperty);
                 } else {
                     strcpy(tempAlarm->action, "EMAIL");
                     do {
@@ -234,7 +235,7 @@ int main() {
                     tempProperty = (Property *) malloc(sizeof(Property) + (strlen(longInput) + 10) * sizeof(char));
                     strcpy(tempProperty->propName, "DESCRIPTION");
                     strcpy(tempProperty->propDescr, longInput);
-                    insertBack(&(tempAlarm->properties),tempProperty);
+                    insertBack(&(tempAlarm->properties), tempProperty);
                     do {
                         inputError = false;
                         printf("\nPlease input alarm summary: ");
@@ -247,7 +248,7 @@ int main() {
                     tempProperty = (Property *) malloc(sizeof(Property) + (strlen(longInput) + 10) * sizeof(char));
                     strcpy(tempProperty->propName, "SUMMARY");
                     strcpy(tempProperty->propDescr, longInput);
-                    insertBack(&(tempAlarm->properties),tempProperty);
+                    insertBack(&(tempAlarm->properties), tempProperty);
                     do {
                         inputError = false;
                         printf("\nPlease input alarm attendee: ");
@@ -260,7 +261,7 @@ int main() {
                     tempProperty = (Property *) malloc(sizeof(Property) + (strlen(longInput) + 10) * sizeof(char));
                     strcpy(tempProperty->propName, "ATTENDEE");
                     strcpy(tempProperty->propDescr, longInput);
-                    insertBack(&(tempAlarm->properties),tempProperty);
+                    insertBack(&(tempAlarm->properties), tempProperty);
                 }
                 do {
                     inputError = false;
