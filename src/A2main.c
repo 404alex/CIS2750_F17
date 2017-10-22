@@ -12,7 +12,7 @@ int main() {
     char input[100];
     char longInput[10000];
     Calendar *obj = NULL;
-    ErrorCode error = OK;
+    ICalErrorCode error = OK;
     Property *tempProperty = NULL;
     char *tempDisplay = NULL;
     bool fileError = false;
@@ -357,3 +357,5 @@ int main() {
     } while (flag);
     return 0;
 }
+
+

@@ -11,7 +11,7 @@
 #include "LinkedListAPI.h"
 #include "help.h"
 
-ErrorCode createCalendar(char *fileName, Calendar **obj) {
+ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
     if (fileName == NULL) {
         return INV_FILE;
     }
@@ -39,7 +39,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     }
     deleteCommont(&listOfToken);
 
-    ErrorCode response = fileValidation(listOfToken);
+    ICalErrorCode response = fileValidation(listOfToken);
     if (response != OK) {
         clearList(&listOfToken);
         free(icsFile);
@@ -214,7 +214,7 @@ ErrorCode createCalendar(char *fileName, Calendar **obj) {
     free(icsFile);
     fclose(calFile);
     clearList(&listOfToken);
-    ErrorCode errorCode;
+    ICalErrorCode errorCode;
     if ((errorCode = validateCalendar(obj[index])) != OK) {
         deleteCalendar(obj[index]);
         return errorCode;
@@ -264,7 +264,7 @@ char *printCalendar(const Calendar *obj) {
  * @param err error code, enum type.
  * @return a string which do not need to be freed.
  */
-const char *printError(ErrorCode err) {
+char * printError(ICalErrorCode err) {
     switch (err) {
         case OK:
             return "Allocated object\nFile parsed successfully\n";
@@ -295,8 +295,8 @@ const char *printError(ErrorCode err) {
     }
 }
 
-ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
-    ErrorCode error;
+ICalErrorCode writeCalendar(char *fileName, const Calendar *obj) {
+    ICalErrorCode error;
     if ((error = validateCalendar(obj)) != OK) {
         return error;
     }
@@ -325,14 +325,15 @@ ErrorCode writeCalendar(char *fileName, const Calendar *obj) {
     }
 }
 
-ErrorCode validateCalendar(const Calendar *obj) {
+ICalErrorCode validateCalendar(const Calendar *obj) {
     if (obj == NULL) {
         return INV_CAL;
     }
-    ErrorCode error;
+    ICalErrorCode error;
     if ((error = vCalValidate(obj)) != OK) {
         return error;
     }
+
     if ((error = vEventValidate(obj->events)) != OK) {
         return error;
     }

@@ -203,7 +203,7 @@ bool unFoldData(List *listOfToken) {
 }
 
 
-ErrorCode fileValidation(List listOfToken) {
+ICalErrorCode fileValidation(List listOfToken) {
     int vcaleCount = 0;
     int calenderCount = 0;
     int veventCount = 0;
@@ -593,33 +593,33 @@ ErrorCode fileValidation(List listOfToken) {
         }
 
 
-        if (regexec(&ianaRegex, elem, numMatch, NULL, 0) != REG_NOMATCH ||
-            regexec(&x_compRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
-            cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
-                       &uidRegex,
-                       &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
-                       &dtendRegex,
-                       &durationRegex, &alarmBeginRegex, &alarmEndRegex);
-            regfree(&prodidNoneRegex);
-            regfree(&versionNoneRegex);
-            regfree(&noNameRegex);
-            regfree(&alarmActionRegex);
-            regfree(&allNoNameRegex);
-            regfree(&alarmTriggerRegex);
-            regfree(&ianaRegex);
-            regfree(&x_compRegex);
-            if (valarmCount == 1) {
-                return INV_ALARM;
-            }
-            if (veventCount == 1) {
-                return INV_EVENT;
-            }
-            if (vcaleCount == 1) {
-                return INV_CAL;
-            } else {
-                return INV_CAL;
-            }
-        }
+//        if (regexec(&ianaRegex, elem, numMatch, NULL, 0) != REG_NOMATCH ||
+//            regexec(&x_compRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+//            cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex,
+//                       &uidRegex,
+//                       &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex,
+//                       &dtendRegex,
+//                       &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+//            regfree(&prodidNoneRegex);
+//            regfree(&versionNoneRegex);
+//            regfree(&noNameRegex);
+//            regfree(&alarmActionRegex);
+//            regfree(&allNoNameRegex);
+//            regfree(&alarmTriggerRegex);
+//            regfree(&ianaRegex);
+//            regfree(&x_compRegex);
+//            if (valarmCount == 1) {
+//                return INV_ALARM;
+//            }
+//            if (veventCount == 1) {
+//                return INV_EVENT;
+//            }
+//            if (vcaleCount == 1) {
+//                return INV_CAL;
+//            } else {
+//                return INV_CAL;
+//            }
+//        }
 
 
         if (regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH ||
@@ -1506,7 +1506,7 @@ int propertyDupFind(List properties, const Property *aProperty) {
         if (strlen(temp->propName) == 0 || strlen(temp->propDescr) == 0) {
             return -1;
         }
-        if (properties.compare(aProperty, elem) == 0) {
+        if (compareProperties(aProperty, elem) == 0) {
             findCount++;
         }
     }
@@ -1514,7 +1514,7 @@ int propertyDupFind(List properties, const Property *aProperty) {
 }
 
 //todo add x-prop and iana-prop validate
-ErrorCode vCalValidate(const Calendar *obj) {
+ICalErrorCode vCalValidate(const Calendar *obj) {
     if (obj->prodID == NULL) {
         return INV_CAL;
     }
@@ -1531,28 +1531,28 @@ ErrorCode vCalValidate(const Calendar *obj) {
     Property *aProperty = malloc(sizeof(Property));
     strcpy(aProperty->propName, "prodid");
     if (propertyDupFind(obj->properties, aProperty) != 0) {
-        obj->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         return DUP_PRODID;
     } else if (propertyDupFind(obj->properties, aProperty) == -1) {
-        obj->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         return INV_CAL;
     }
     strcpy(aProperty->propName, "version");
     if (propertyDupFind(obj->properties, aProperty) != 0) {
-        obj->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         return DUP_VER;
     }
     strcpy(aProperty->propName, "calscale");
     if (propertyDupFind(obj->properties, aProperty) > 1) {
-        obj->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         return INV_CAL;
     }
     strcpy(aProperty->propName, "method");
     if (propertyDupFind(obj->properties, aProperty) > 1) {
-        obj->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         return INV_CAL;
     }
-    obj->properties.deleteData(aProperty);
+    deleteProperties(aProperty);
     void *elem;
     ListIterator iter = createIterator(obj->properties);
     while ((elem = nextElement(&iter)) != NULL) {
@@ -1565,7 +1565,7 @@ ErrorCode vCalValidate(const Calendar *obj) {
 }
 
 //todo add x-prop and iana-prop validate
-ErrorCode vAlarmValidate(List alarm) {
+ICalErrorCode vAlarmValidate(List alarm) {
     void *elem;
     ListIterator iter = createIterator(alarm);
     while ((elem = nextElement(&iter)) != NULL) {
@@ -1579,27 +1579,27 @@ ErrorCode vAlarmValidate(List alarm) {
         Property *aProperty = malloc(sizeof(Property));
         strcpy(aProperty->propName, "action");
         if (propertyDupFind(temp->properties, aProperty) != 0) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         } else if (propertyDupFind(temp->properties, aProperty) == -1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         }
         strcpy(aProperty->propName, "trigger");
         if (propertyDupFind(temp->properties, aProperty) != 0) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         }
         int durationCount = 0;
         int repeatCount = 0;
         strcpy(aProperty->propName, "duration");
         if ((durationCount = propertyDupFind(temp->properties, aProperty)) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         }
         strcpy(aProperty->propName, "repeat");
         if ((repeatCount = propertyDupFind(temp->properties, aProperty)) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         }
         if (durationCount != repeatCount) {
@@ -1609,29 +1609,29 @@ ErrorCode vAlarmValidate(List alarm) {
         if (strcasecmp(temp->action, "display") == 0) {
             strcpy(aProperty->propName, "description");
             if (propertyDupFind(temp->properties, aProperty) != 1) {
-                temp->properties.deleteData(aProperty);
+                deleteProperties(aProperty);
                 return INV_ALARM;
             }
         } else if (strcasecmp(temp->action, "email") == 0) {
             strcpy(aProperty->propName, "description");
             if (propertyDupFind(temp->properties, aProperty) != 1) {
-                temp->properties.deleteData(aProperty);
+                deleteProperties(aProperty);
                 return INV_ALARM;
             }
             strcpy(aProperty->propName, "summary");
             if (propertyDupFind(temp->properties, aProperty) != 1) {
-                temp->properties.deleteData(aProperty);
+                deleteProperties(aProperty);
                 return INV_ALARM;
             }
 
             strcpy(aProperty->propName, "attendee");
             if (propertyDupFind(temp->properties, aProperty) < 1) {
-                temp->properties.deleteData(aProperty);
+                deleteProperties(aProperty);
                 return INV_ALARM;
             }
         }
 
-        temp->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         void *elem2;
         ListIterator iter2 = createIterator(temp->properties);
         while ((elem2 = nextElement(&iter2)) != NULL) {
@@ -1652,7 +1652,7 @@ ErrorCode vAlarmValidate(List alarm) {
 
 
 //todo add x-prop and iana-prop validate
-ErrorCode vEventValidate(List event) {
+ICalErrorCode vEventValidate(List event) {
     void *elem;
     ListIterator iter = createIterator(event);
     while ((elem = nextElement(&iter)) != NULL) {
@@ -1666,102 +1666,102 @@ ErrorCode vEventValidate(List event) {
         Property *aProperty = malloc(sizeof(Property));
         strcpy(aProperty->propName, "uid");
         if (propertyDupFind(temp->properties, aProperty) != 0) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         } else if (propertyDupFind(temp->properties, aProperty) == -1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "dtstamp");
         if (propertyDupFind(temp->properties, aProperty) != 0) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_CREATEDT;
         }
         strcpy(aProperty->propName, "dtstart");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "class");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "created");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "description");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "geo");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "last-mod");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "location");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "organizer");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "priority");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "seq");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "status");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "summary");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "transp");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "url");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "recurid");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         strcpy(aProperty->propName, "rrule");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_EVENT;
         }
         if (vAlarmValidate(temp->alarms) != OK) {
-            temp->properties.deleteData(aProperty);
+            deleteProperties(aProperty);
             return INV_ALARM;
         }
-        temp->properties.deleteData(aProperty);
+        deleteProperties(aProperty);
         void *elem2;
         ListIterator iter2 = createIterator(temp->properties);
         while ((elem2 = nextElement(&iter2)) != NULL) {

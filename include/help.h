@@ -57,7 +57,7 @@ bool unFoldData(List *listOfToken);
  * @param listOfToken the list than contain the whole file.
  * @return the error code.
  */
-ErrorCode fileValidation(List listOfToken);
+ICalErrorCode fileValidation(List listOfToken);
 
 /**
  * delete the elements in the list which contain a comment.
@@ -197,9 +197,9 @@ void deleteEvent(void *toBeDeleted);
  * @param obj
  * @return
  */
-ErrorCode vCalValidate(const Calendar *obj);
+ICalErrorCode vCalValidate(const Calendar *obj);
 
-ErrorCode vEventValidate(List event);
+ICalErrorCode vEventValidate(List event);
 
 char *writeAlarm(void *toBePrinted);
 
