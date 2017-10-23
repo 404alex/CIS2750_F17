@@ -81,6 +81,7 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                 versionNumber = getVersionNumber(elem);
                 if (versionNumber == 0) {
                     deleteCalendar(obj[index]);
+                    obj[index] = NULL;
                     clearList(&listOfToken);
                     free(icsFile);
                     fclose(calFile);
@@ -92,6 +93,7 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                 temp = getProdid(elem);
                 if (temp == NULL) {
                     deleteCalendar(obj[index]);
+                    obj[index] = NULL;
                     clearList(&listOfToken);
                     free(icsFile);
                     fclose(calFile);
@@ -216,7 +218,8 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
     clearList(&listOfToken);
     ICalErrorCode errorCode;
     if ((errorCode = validateCalendar(obj[index])) != OK) {
-        deleteCalendar(obj[index]);
+        deleteCalendar(*obj);
+        obj[index] = NULL;
         return errorCode;
     }
     return OK;
@@ -227,6 +230,7 @@ void deleteCalendar(Calendar *obj) {
     clearList(&(obj->events));
     clearList(&(obj->properties));
     free(obj);
+    obj = NULL;
 }
 
 char *printCalendar(const Calendar *obj) {
@@ -264,7 +268,7 @@ char *printCalendar(const Calendar *obj) {
  * @param err error code, enum type.
  * @return a string which do not need to be freed.
  */
-char * printError(ICalErrorCode err) {
+char *printError(ICalErrorCode err) {
     switch (err) {
         case OK:
             return "Allocated object\nFile parsed successfully\n";

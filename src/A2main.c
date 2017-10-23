@@ -6,7 +6,6 @@
 #include <regex.h>
 #include "CalendarParser.h"
 #include "help.h"
-
 int main() {
     bool flag = true;
     char input[100];
