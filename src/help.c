@@ -1605,8 +1605,13 @@ ICalErrorCode vAlarmValidate(List alarm) {
         if (durationCount != repeatCount) {
             return INV_ALARM;
         }
-
-        if (strcasecmp(temp->action, "display") == 0) {
+        if (strcasecmp(temp->action, "audio") == 0) {
+            strcpy(aProperty->propName, "description");
+            if (propertyDupFind(temp->properties, aProperty) != 0) {
+                deleteProperties(aProperty);
+                return INV_ALARM;
+            }
+        } else if (strcasecmp(temp->action, "display") == 0) {
             strcpy(aProperty->propName, "description");
             if (propertyDupFind(temp->properties, aProperty) != 1) {
                 deleteProperties(aProperty);
