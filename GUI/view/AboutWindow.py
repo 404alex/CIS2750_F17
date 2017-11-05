@@ -6,12 +6,12 @@ from GUI.view import HelpMethod
 
 def dialog():
     win = Toplevel()
-    HelpMethod.centerOfWindow(win, 240, 150)
+    HelpMethod.centerOfWindow(win, 240, 170)
     win.resizable(width=False, height=False)
     win.focus_set()
     win.grab_set()
     win.title('About iCalGUI')
-    Label(win, text='iCalGUI', fg='green', font=(40)).grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+    Label(win, text='iCalGUI', fg='green', font=('Helvetica', 20)).grid(row=0, column=0, padx=10, pady=10, columnspan=2)
     Label(win, text='Creator: ').grid(row=1, column=0, sticky=E)
     Label(win, text='Chenxingyu Chen').grid(row=1, column=1, sticky=W)
     Label(win, text='Version:').grid(row=2, column=0, sticky=E)
