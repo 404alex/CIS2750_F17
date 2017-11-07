@@ -1,39 +1,60 @@
-from tkinter import *
 from tkinter.messagebox import *
+from tkinter.filedialog import *
+from tkinter.simpledialog import *
 from tkinter.ttk import Treeview
+from . import AboutWindow
+from GUI.business import HelpMethod
+from GUI.business import Calendar
+from . import CreateCalendarWindow
+
 import sys
-from GUI.view import AboutWindow
-from GUI.view import HelpMethod
 
 
 class MainWindow(Tk):
+    _filepath = ''
+
     def close(*args):
-        result = askyesno('Close program', 'Do you want to close?')
-        if (result == True):
+        result = askyesno('Close program', 'Do you want to close?', parent=args[0])
+        if result:
             sys.exit(0)
 
     def save(*args):
-        # todo savemethod
-        showerror('Not available', 'Not available')
+        if args[0]._filepath == '':
+            args[0].saveAs(args)
+        else:
+            showinfo("")
 
     def saveAs(*args):
-        # todo save as method
-        showerror('Not available', 'Not available')
+        args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")], name='sss')
+        # showinfo(args[0]._filepath, args[0]._filepath)
 
     def open(*args):
-        # todo open method
-        showerror('Not available', 'Not available')
+        args[0]._filepath = askopenfilename(filetypes=[("ICal File", "*.ics")])
+        # showinfo(_filepath,_filepath)
 
     def createCalendar(*args):
-        # todo open method
-        showerror('Not available', 'Not available')
+        calObj = CreateCalendarWindow.CreateCalendarWindow(args[0])
+        args[0].wait_window(calObj.top)
 
     def createEvent(*args):
         # todo open method
         showerror('Not available', 'Not available')
 
+    def showAlarms(*args):
+        # todo open method
+        showerror('Not available', 'Not available')
+
+    def extractProps(*args):
+        # todo open method
+        showerror('Not available', 'Not available')
+
     def about(*args):
         AboutWindow.dialog()
+
+    def cleanOnClick(*args):
+        _globelLogInfoText.config(state=NORMAL)
+        _globelLogInfoText.delete('1.0', END)
+        _globelLogInfoText.config(state=DISABLED)
 
     def __init__(self):
         Tk.__init__(self)
@@ -53,6 +74,12 @@ class MainWindow(Tk):
         self.bind_all('<Control-s>', self.save)
         self.bind_all('<Control-o>', self.open)
         self.makeRightClickMenu()
+        # test value
+        for i in range(100):
+            self.logInfoText("AAA")
+            self.logInfoText("\n")
+        # test value
+        self.protocol('WM_DELETE_WINDOW', self.close)
 
     def makeMenuFile(self, menuFile, menuBar):
         menuFile.add_command(label='Open...', command=self.open, accelerator='Ctrl+O', underline=0)
@@ -112,8 +139,8 @@ class MainWindow(Tk):
         panelInsideDown = Frame(panel)
         panelInsideDown.place(x=0, y=30, width=580, height=165)
         label = Label(panelInsideUp, text='Log Info:', width=10, anchor='w', font=('Helvetica', 12)).grid(row=0,
-                                                                                                         column=0)
-        button = Button(panelInsideUp, text='Clear', width=5).grid(row=0, column=1)
+                                                                                                          column=0)
+        button = Button(panelInsideUp, text='Clear', width=5, command=self.cleanOnClick).grid(row=0, column=1)
         scrollBar = Scrollbar(panelInsideDown)
         scrollBar.pack(side=RIGHT, fill=Y)
         global _globelLogInfoText
@@ -125,18 +152,21 @@ class MainWindow(Tk):
 
     def logInfoText(self, text):
         _globelLogInfoText.config(state=NORMAL)
-        _globelLogInfoText.delete('1.0', END)
-        _globelLogInfoText.insert('1.0', text)
+        _globelLogInfoText.insert(INSERT, text)
         _globelLogInfoText.config(state=DISABLED)
+        _globelLogInfoText.see(END)
 
     def makeRightClickMenu(self):
         menu = Menu(self, tearoff=0)
-        menu.add_command(label='Show Alarms')
-        menu.add_command(label='Extract optional props')
+        menu.add_command(label='Show Alarms', command=self.showAlarms)
+        menu.add_command(label='Extract optional props', command=self.extractProps)
 
         def displayMenu(event):
-            if len(_fileViewTree.selection()) == 0:
-                return 'Continue'
-            menu.post(event.x_root, event.y_root)
+            item = _fileViewTree.identify_row(event.y)
+            if item:
+                _fileViewTree.selection_set(item)
+                menu.tk_popup(event.x_root, event.y_root)
+            else:
+                pass
 
         _fileViewTree.bind('<Button-3>', displayMenu)

@@ -1,7 +1,5 @@
 from tkinter import *
-from tkinter.messagebox import *
-import sys
-from GUI.view import HelpMethod
+from GUI.business import HelpMethod
 
 
 def dialog():
