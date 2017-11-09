@@ -131,6 +131,24 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                             strcpy(event->creationDateTime.time, temp);
                             free(temp);
                             break;
+                        case 12:
+                            event->startDateTime.UTC = true;
+                            temp = getUTCDate(elem);
+                            strcpy(event->startDateTime.date, temp);
+                            free(temp);
+                            temp = getUTCTime(elem);
+                            strcpy(event->startDateTime.time, temp);
+                            free(temp);
+                            break;
+                        case 13:
+                            event->startDateTime.UTC = false;
+                            temp = getUTCDate(elem);
+                            strcpy(event->startDateTime.date, temp);
+                            free(temp);
+                            temp = getTime(elem);
+                            strcpy(event->startDateTime.time, temp);
+                            free(temp);
+                            break;
                         case 9:
                             alarmTemp = (Alarm *) malloc(sizeof(Alarm));
                             alarmTemp->trigger = NULL;

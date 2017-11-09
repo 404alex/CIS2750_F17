@@ -946,6 +946,22 @@ int contentIndicator(void *elem) {
         regfree(&alarmTriRegex);
         return 11;
     }
+    if (regexec(&dtstartRegexUTC, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+        return 12;
+    }
+    if (regexec(&dtstartRegex, elem, numMatch, NULL, 0) != REG_NOMATCH) {
+        cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
+                   &dtStampRegexUTC, &dtstartRegexUTC, &dtendRegexUTC, &dtStampRegex, &dtstartRegex, &dtendRegex,
+                   &durationRegex, &alarmBeginRegex, &alarmEndRegex);
+        regfree(&alarmActionRegex);
+        regfree(&alarmTriRegex);
+        return 13;
+    }
 
 
     cleanRegex(&beginCalRegex, &endCalRegex, &beginEveRegex, &endEveRegex, &versionRegex, &proidRegex, &uidRegex,
@@ -988,9 +1004,16 @@ char *printEvent(void *toBePrinted) {
     int lengthOfCreationDT =
             strlen(event->creationDateTime.date) + strlen(event->creationDateTime.time) + 30;
     char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
+    lengthOfCreationDT =
+            strlen(event->startDateTime.date) + strlen(event->startDateTime.time) + 30;
+    char *startDateTime = malloc(sizeof(char) * lengthOfCreationDT);
     strcpy(creationDateTime, event->creationDateTime.date);
     strcat(creationDateTime, ":");
     strcat(creationDateTime, event->creationDateTime.time);
+
+    strcpy(startDateTime, event->startDateTime.date);
+    strcat(startDateTime, ":");
+    strcat(startDateTime, event->startDateTime.time);
     if (event->creationDateTime.UTC == true) {
         strcat(creationDateTime, ", UTC=1");
     } else {
@@ -1002,6 +1025,8 @@ char *printEvent(void *toBePrinted) {
     strcpy(string, "\tUID = ");
     strcat(string, event->UID);
     strcat(string, "\n\tcreationDateTime = ");
+    strcat(string, creationDateTime);
+    strcat(string, "\n\tstartDateTime = ");
     strcat(string, creationDateTime);
     strcat(string, "\n\tAlarms:\n");
     strcat(string, alarms);
@@ -1059,11 +1084,20 @@ char *writeEvent(void *toBePrinted) {
     int lengthOfCreationDT =
             strlen(event->creationDateTime.date) + strlen(event->creationDateTime.time) + 30;
     char *creationDateTime = malloc(sizeof(char) * lengthOfCreationDT);
+    lengthOfCreationDT =
+            strlen(event->startDateTime.date) + strlen(event->startDateTime.time) + 30;
+    char *startDateTime = malloc(sizeof(char) * lengthOfCreationDT);
     strcpy(creationDateTime, event->creationDateTime.date);
     strcat(creationDateTime, "T");
     strcat(creationDateTime, event->creationDateTime.time);
+    strcpy(startDateTime, event->startDateTime.date);
+    strcat(startDateTime, "T");
+    strcat(startDateTime, event->startDateTime.time);
     if (event->creationDateTime.UTC == true) {
         strcat(creationDateTime, "Z");
+    }
+    if (event->startDateTime.UTC == true) {
+        strcat(startDateTime, "Z");
     }
     char *string = malloc(sizeof(char) *
                           (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
@@ -1073,6 +1107,8 @@ char *writeEvent(void *toBePrinted) {
     strcat(string, event->UID);
     strcat(string, "\r\nDTSTAMP:");
     strcat(string, creationDateTime);
+    strcat(string, "\r\nDTSTART:");
+    strcat(string, startDateTime);
     strcat(string, "\r\n");
     strcat(string, property);
     strcat(string, alarms);
@@ -1668,6 +1704,9 @@ ICalErrorCode vEventValidate(List event) {
         if (strlen(temp->creationDateTime.date) != 8 || strlen(temp->creationDateTime.time) != 6) {
             return INV_CREATEDT;
         }
+        if (strlen(temp->startDateTime.date) != 8 || strlen(temp->startDateTime.time) != 6) {
+            return INV_EVENT;
+        }
         Property *aProperty = malloc(sizeof(Property));
         strcpy(aProperty->propName, "uid");
         if (propertyDupFind(temp->properties, aProperty) != 0) {
@@ -1683,10 +1722,19 @@ ICalErrorCode vEventValidate(List event) {
             return INV_CREATEDT;
         }
         strcpy(aProperty->propName, "dtstart");
-        if (propertyDupFind(temp->properties, aProperty) > 1) {
+        if (propertyDupFind(temp->properties, aProperty) > 0) {
             deleteProperties(aProperty);
             return INV_EVENT;
         }
+        strcpy(aProperty->propName, "dtend");
+        int dtend = propertyDupFind(temp->properties, aProperty);
+        strcpy(aProperty->propName, "duration");
+        dtend += propertyDupFind(temp->properties, aProperty);
+        if (dtend != 1) {
+            deleteProperties(aProperty);
+            return INV_EVENT;
+        }
+
         strcpy(aProperty->propName, "class");
         if (propertyDupFind(temp->properties, aProperty) > 1) {
             deleteProperties(aProperty);
