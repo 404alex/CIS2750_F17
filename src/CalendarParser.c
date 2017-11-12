@@ -64,6 +64,7 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
     Property *aProperty;
     Event *event;
     float versionNumber;
+    bool haveStartDT = false;
     while ((elem = nextElement(&iter)) != NULL) {
         if (contentIndicator(elem) == 1) {
             break;
@@ -132,6 +133,7 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                             free(temp);
                             break;
                         case 12:
+                            haveStartDT = true;
                             event->startDateTime.UTC = true;
                             temp = getUTCDate(elem);
                             strcpy(event->startDateTime.date, temp);
@@ -141,6 +143,7 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                             free(temp);
                             break;
                         case 13:
+                            haveStartDT = true;
                             event->startDateTime.UTC = false;
                             temp = getUTCDate(elem);
                             strcpy(event->startDateTime.date, temp);
@@ -208,6 +211,11 @@ ICalErrorCode createCalendar(char *fileName, Calendar **obj) {
                             free(description);
                             break;
                     }
+                }
+                if (haveStartDT == false) {
+                    event->startDateTime.UTC = event->creationDateTime.UTC;
+                    strcpy(event->startDateTime.time, event->creationDateTime.time);
+                    strcpy(event->startDateTime.date, event->creationDateTime.date);
                 }
                 insertBack(&(obj[index]->events), event);
                 break;

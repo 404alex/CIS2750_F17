@@ -696,9 +696,9 @@ ICalErrorCode fileValidation(List listOfToken) {
         // if the dtstamp properties number not equal to the event component number, return error.
         return INV_CREATEDT;
     }
-    if (dtstartCount != dtendCount) {
-        return INV_EVENT;
-    }
+//    if (dtstartCount != dtendCount) {
+//        return INV_EVENT;
+//    }
     if (alarmActionCount != alarmCount) {
         return INV_ALARM;
     }
@@ -816,7 +816,7 @@ int contentIndicator(void *elem) {
     char *proidPattern = "^[Pp][Rr][Oo][Dd][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *uidPattern = "^[Uu][Ii][Dd]:[ ]*[0-9A-Za-z/\\\\\\.\\-]{1}.*";
     char *dtStampPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Mm][Pp]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
-    char *dtstartPatternUTC = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
+    char *dtstartPatternUTC = "[Dd][Tt][Ss][Tt][Aa][Rr][Tt]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]$";
     char *dtendPatternUTC = "^[Dd][Tt][Ee][Nn][Dd]:[ ]*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}[Z]?$";
     char *dtStampPattern = "^[Dd][Tt][Ss][Tt][Aa][Mm][Pp][;:][ ]*[Tt]?[Zz]?[Ii]?[Dd]?[ ]*=?[ ]*.*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
     char *dtstartPattern = "^[Dd][Tt][Ss][Tt][Aa][Rr][Tt][;:][ ]*[Tt]?[Zz]?[Ii]?[Dd]?[ ]*=?[ ]*.*[1-9][0-9]{7}[A-Za-z]{1}[0-9]{6}$";
@@ -1035,6 +1035,7 @@ char *printEvent(void *toBePrinted) {
     free(property);
     free(alarms);
     free(creationDateTime);
+    free(startDateTime);
     return string;
 }
 
@@ -1100,7 +1101,8 @@ char *writeEvent(void *toBePrinted) {
         strcat(startDateTime, "Z");
     }
     char *string = malloc(sizeof(char) *
-                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(event->UID) +
+                          (strlen(property) + strlen(alarms) + strlen(creationDateTime) + strlen(startDateTime) +
+                           strlen(event->UID) +
                            300));
     strcpy(string, "BEGIN:VEVENT\r\n");
     strcat(string, "UID:");
@@ -1116,6 +1118,7 @@ char *writeEvent(void *toBePrinted) {
     free(property);
     free(alarms);
     free(creationDateTime);
+    free(startDateTime);
     return string;
 }
 
@@ -1730,7 +1733,7 @@ ICalErrorCode vEventValidate(List event) {
         int dtend = propertyDupFind(temp->properties, aProperty);
         strcpy(aProperty->propName, "duration");
         dtend += propertyDupFind(temp->properties, aProperty);
-        if (dtend != 1) {
+        if (dtend != 1 && dtend != 0) {
             deleteProperties(aProperty);
             return INV_EVENT;
         }
