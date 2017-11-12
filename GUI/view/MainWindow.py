@@ -6,6 +6,7 @@ from . import AboutWindow
 from GUI.business import HelpMethod
 from GUI.business import Calendar
 from . import CreateCalendarWindow
+from . import CreateEventWindow
 
 import sys
 
@@ -25,7 +26,11 @@ class MainWindow(Tk):
             showinfo("")
 
     def saveAs(*args):
-        args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")], name='sss')
+        args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")])
+        if (len(args[0]._filepath) <= 4):
+            return 'Continue'
+        strArray = args[0]._filepath.split('/')
+        args[0].changeTitle(strArray[len(strArray) - 1])
         # showinfo(args[0]._filepath, args[0]._filepath)
 
     def open(*args):
@@ -33,12 +38,12 @@ class MainWindow(Tk):
         # showinfo(_filepath,_filepath)
 
     def createCalendar(*args):
-        calObj = CreateCalendarWindow.CreateCalendarWindow(args[0])
-        args[0].wait_window(calObj.top)
+        calWin = CreateCalendarWindow.CreateCalendarWindow(args[0])
+        args[0].wait_window(calWin.top)
 
     def createEvent(*args):
-        # todo open method
-        showerror('Not available', 'Not available')
+        eventWin = CreateEventWindow.CreateEventWindow(args[0])
+        args[0].wait_window(eventWin.top)
 
     def showAlarms(*args):
         # todo open method
@@ -170,3 +175,6 @@ class MainWindow(Tk):
                 pass
 
         _fileViewTree.bind('<Button-3>', displayMenu)
+
+    def changeTitle(self, fileName):
+        self.title("iCalGUI - " + fileName)
