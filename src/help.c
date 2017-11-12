@@ -1915,5 +1915,26 @@ char *writeCalendarString(const Calendar *obj) {
 }
 
 
+Calendar *createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT) {
+    Calendar *obj;
+    obj = (Calendar *) malloc(sizeof(Calendar));
+    obj->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
+    obj->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+    obj->version = version;
+    strcpy(obj->prodID, prodid);
+    Event *tempEvent;
+    tempEvent = (Event *) malloc(sizeof(Event));
+    tempEvent->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+    tempEvent->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
+    strcpy(tempEvent->creationDateTime.date, getUTCDate(createDT));
+    strcpy(tempEvent->creationDateTime.time, getUTCTime(createDT));
+    tempEvent->creationDateTime.UTC = true;
+    strcpy(tempEvent->startDateTime.date, getUTCDate(startDT));
+    strcpy(tempEvent->startDateTime.time, getUTCTime(startDT));
+    tempEvent->startDateTime.UTC = true;
+    strcpy(tempEvent->UID, UID);
+    return obj;
+}
+
 
 

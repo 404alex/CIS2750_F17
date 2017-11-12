@@ -5,16 +5,22 @@ from . import CreateEventWindow
 
 
 class CreateCalendarWindow:
+    calArgs = {}
 
     def cancel(*args):
         result = askyesno('Cancel Action', 'Do you want to cancel?', parent=args[0].top)
         if result:
+            args[0].calArgs = {}
             args[0].top.destroy()
 
     def ok(*args):
         eventWin = CreateEventWindow.CreateEventWindow(args[1])
         args[1].wait_window(eventWin.top)
-        print(eventWin.isCancel)
+        if eventWin.isCancel:
+            showerror('Error', 'You have to create a new event!')
+        else:
+            args[0].calArgs = {**eventWin.eventArgs, **args[0].calArgs}
+            args[0].top.destroy()
 
     def __init__(self, parent):
         win = self.top = Toplevel(parent)
@@ -39,6 +45,8 @@ class CreateCalendarWindow:
         win.nametowidget('_textVersion').config(state=DISABLED)
         win.nametowidget('_prodid').insert('1.0', '-//iCalGUI//F17CIS2750//CN')
         win.nametowidget('_prodid').config(state=DISABLED)
+        self.calArgs['version'] = '2.0'
+        self.calArgs['prodID'] = '-//iCalGUI//F17CIS2750//CN'
 
         Button(win, text='Create Event', command=lambda: self.ok(win), width=10).grid(row=5, column=1, sticky=E)
         Button(win, text='Cancel', command=self.cancel).grid(row=5, column=2, sticky=W)

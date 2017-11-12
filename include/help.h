@@ -208,3 +208,5 @@ char *writeEvent(void *toBePrinted);
 char *foldWritenString(char *string);
 
 char *writeCalendarString(const Calendar *obj);
+
+Calendar *createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT);

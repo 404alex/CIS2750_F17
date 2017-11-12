@@ -7,12 +7,14 @@ from GUI.business import HelpMethod
 from GUI.business import Calendar
 from . import CreateCalendarWindow
 from . import CreateEventWindow
+from ctypes import *
 
 import sys
 
 
 class MainWindow(Tk):
     _filepath = ''
+    _calObject = Calendar.Calendar()
 
     def close(*args):
         result = askyesno('Close program', 'Do you want to close?', parent=args[0])
@@ -40,10 +42,15 @@ class MainWindow(Tk):
     def createCalendar(*args):
         calWin = CreateCalendarWindow.CreateCalendarWindow(args[0])
         args[0].wait_window(calWin.top)
+        array = HelpMethod.newCalParameterArray(calWin.calArgs)
+        _calObjective = Calendar.createCalGui(2.0, array[2].value, array[0].value, array[4].value, array[1].value)
+        args[0].logInfoText(Calendar.printCal(_calObjective).decode('UTF-8'))
 
     def createEvent(*args):
         eventWin = CreateEventWindow.CreateEventWindow(args[0])
         args[0].wait_window(eventWin.top)
+        # todo Event value return here
+        print(eventWin.eventArgs)
 
     def showAlarms(*args):
         # todo open method
@@ -79,11 +86,6 @@ class MainWindow(Tk):
         self.bind_all('<Control-s>', self.save)
         self.bind_all('<Control-o>', self.open)
         self.makeRightClickMenu()
-        # test value
-        for i in range(100):
-            self.logInfoText("AAA")
-            self.logInfoText("\n")
-        # test value
         self.protocol('WM_DELETE_WINDOW', self.close)
 
     def makeMenuFile(self, menuFile, menuBar):
