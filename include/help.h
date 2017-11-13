@@ -212,3 +212,7 @@ char *writeCalendarString(const Calendar *obj);
 void createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT, Calendar **obj);
 
 char **getRowInfo(Calendar *cal);
+
+char *printEventForUI(const Event *event);
+
+char *printAlarmForUI(const Event *event);

@@ -1552,7 +1552,6 @@ int propertyDupFind(List properties, const Property *aProperty) {
     return findCount;
 }
 
-//todo add x-prop and iana-prop validate
 ICalErrorCode vCalValidate(const Calendar *obj) {
     if (obj->prodID == NULL) {
         return INV_CAL;
@@ -1603,7 +1602,6 @@ ICalErrorCode vCalValidate(const Calendar *obj) {
     return OK;
 }
 
-//todo add x-prop and iana-prop validate
 ICalErrorCode vAlarmValidate(List alarm) {
     void *elem;
     ListIterator iter = createIterator(alarm);
@@ -1695,7 +1693,6 @@ ICalErrorCode vAlarmValidate(List alarm) {
 }
 
 
-//todo add x-prop and iana-prop validate
 ICalErrorCode vEventValidate(List event) {
     void *elem;
     ListIterator iter = createIterator(event);
@@ -1999,5 +1996,37 @@ char **getRowInfo(Calendar *cal) {
     return result;
 }
 
+char *printEventForUI(const Event *event) {
+    if (event == NULL)
+        return NULL;
+    ListIterator iter = createIterator(event->properties);
+    char *property = malloc(sizeof(char) * 10);
+    strcpy(property, "");
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        char *temp = event->properties.printData(elem);
+        property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
+        strcat(property, temp);
+        strcat(property, "\r\n");
+        free(temp);
+    }
+    free(property);
+    return property;
+}
 
 
+char *printAlarmForUI(const Event *event) {
+    ListIterator iter2 = createIterator(event->alarms);
+    char *alarms = malloc(sizeof(char) * 10);
+    strcpy(alarms, "");
+    void *elem2;
+    while ((elem2 = nextElement(&iter2)) != NULL) {
+        char *temp = event->alarms.printData(elem2);
+        alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
+        strcat(alarms, temp);
+        strcat(alarms, "\r\n");
+        free(temp);
+    }
+    free(alarms);
+    return alarms;
+}

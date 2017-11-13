@@ -7,6 +7,6 @@ list:
 	$(CC) $(CFLAGS) -o bin/LinkedListAPIlib.so -fPIC src/LinkedListAPI.c
 parser: list
 	$(CC) $(CFLAGS) -o bin/helplib.so -fPIC src/help.c include/CalendarParser.h src/CalendarParser.c src/LinkedListAPI.c
-	$(CC) $(CFLAGS) -o parserlib.so -fPIC src/CalendarParser.c bin/helplib.so bin/LinkedListAPIlib.so
+	$(CC) $(CFLAGS) -o bin/parserlib.so -fPIC src/CalendarParser.c bin/helplib.so bin/LinkedListAPIlib.so
 clean:
 	rm bin/*

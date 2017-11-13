@@ -65,7 +65,7 @@ class CreateEventWindow:
         win = self.top = Toplevel(parent)
         fourDigiVali = win.register(fourDigiValidate)
         twoDigiVali = win.register(twoDigiValidate)
-        HelpMethod.centerOfWindow(win, 375, 375)
+        HelpMethod.centerOfWindow(win, 375, 189)
         win.resizable(width=False, height=False)
         win.focus_set()
         win.grab_set()

@@ -26,7 +26,11 @@ class MainWindow(Tk):
         if args[0]._filepath == '':
             args[0].saveAs(args)
         else:
-            showinfo("")
+            returnResult = Calendar.writeCal(args[0]._filepath.encode('UTF-8'), args[0]._calObject)
+            args[0].logInfoText(Calendar.printError(returnResult).decode('UTF-8'))
+            if returnResult != 0:
+                showerror('Error', 'Cannot Save...')
+            return
 
     def saveAs(*args):
         args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")])
@@ -34,12 +38,33 @@ class MainWindow(Tk):
             return 'Continue'
         strArray = args[0]._filepath.split('/')
         args[0].changeTitle(strArray[len(strArray) - 1])
+        returnResult = Calendar.writeCal(args[0]._filepath.encode('UTF-8'), args[0]._calObject)
+        args[0].logInfoText(Calendar.printError(returnResult).decode('UTF-8'))
+        if returnResult != 0:
+            showerror('Error', 'Cannot Save...')
+        return
         # showinfo(args[0]._filepath, args[0]._filepath)
 
     def open(*args):
+        if args[0]._calObject:
+            result = askyesno('Create New Calendar',
+                              'One Cal obj in program, if continue, it will lost, make sure you already saved it.',
+                              parent=args[0])
+            if result == False:
+                return
         args[0]._filepath = askopenfilename(filetypes=[("ICal File", "*.ics")])
-        Calendar.createCal(args[0]._filepath.encode('UTF-8'), )
-        # showinfo(_filepath,_filepath)
+        returnResult = Calendar.createCal(args[0]._filepath.encode('UTF-8'), byref(args[0]._calObject))
+        args[0].logInfoText(Calendar.printError(returnResult).decode('UTF-8'))
+        if returnResult != 0:
+            showerror('Error', 'File not valid, read fail.')
+            return
+        rowResult = Calendar.getRowResult(args[0]._calObject)
+        list = []
+        arrayLength = int(rowResult[0].decode('UTF-8'))
+        for i in range(arrayLength):
+            list.append(rowResult[i + 1].decode('UTF-8'))
+        _fileViewTree.delete(*_fileViewTree.get_children())
+        _fileViewTree.insert('', 'end', values=list[0].split('*SP*'))
 
     def createCalendar(*args):
         if args[0]._calObject:
@@ -48,9 +73,11 @@ class MainWindow(Tk):
                               parent=args[0])
             if result == False:
                 return
-        _fileViewTree.delete(*_fileViewTree.get_children())
+
         calWin = CreateCalendarWindow.CreateCalendarWindow(args[0])
         args[0].wait_window(calWin.top)
+        if (len(calWin.calArgs) == 0):
+            return
         array = HelpMethod.newCalParameterArray(calWin.calArgs)
         Calendar.createCalGui(2.0, array[2].value, array[0].value, array[4].value, array[1].value,
                               byref(args[0]._calObject))
@@ -59,7 +86,9 @@ class MainWindow(Tk):
         arrayLength = int(rowResult[0].decode('UTF-8'))
         for i in range(arrayLength):
             list.append(rowResult[i + 1].decode('UTF-8'))
+        _fileViewTree.delete(*_fileViewTree.get_children())
         _fileViewTree.insert('', 'end', values=list[0].split('*SP*'))
+        args[0].logInfoText(Calendar.printError(c_int(0)).decode('UTF-8'))
 
     def createEvent(*args):
         eventWin = CreateEventWindow.CreateEventWindow(args[0])
@@ -68,7 +97,8 @@ class MainWindow(Tk):
         print(eventWin.eventArgs)
 
     def showAlarms(*args):
-        # todo open method
+        selection = _fileViewTree.selection()
+
         showerror('Not available', 'Not available')
 
     def extractProps(*args):

@@ -3,7 +3,7 @@ from ctypes import *
 from . import Event
 from . import Structures
 
-icalLibPath = 'bin/CalendarParserlib.so'
+icalLibPath = 'bin/parserlib.so'
 icalLib = CDLL(icalLibPath)
 
 cHelpLibPath = 'bin/helplib.so'
@@ -42,3 +42,10 @@ createCalGui.restype = None
 getRowResult = cHelpLib.getRowInfo
 getRowResult.argtypes = [POINTER(Calendar)]
 getRowResult.restype = POINTER(c_char_p)
+printEveOp = cHelpLib.printEventForUI
+printEveOp.argtypes = [POINTER(Event.Event)]
+printEveOp.restype = POINTER(c_char_p)
+printEveAl = cHelpLib.printEventForUI
+printEveAl.argtypes = [POINTER(Event.Event)]
+printEveAl.restype = POINTER(c_char_p)
+
