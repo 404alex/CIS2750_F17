@@ -1410,15 +1410,15 @@ char *printAlarm(void *toBePrinted) {
         char *temp = alarm->properties.printData(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
         strcat(property, temp);
-        strcat(property, "\r\n");
+        strcat(property, "\n");
         free(temp);
     }
     char *string = malloc(sizeof(char) * (strlen(property) + strlen(alarm->action) + strlen(alarm->trigger) + 50));
-    strcpy(string, "\t\tAction: ");
+    strcpy(string, "Action: ");
     strcat(string, alarm->action);
-    strcat(string, "\r\n\t\tTrigger: ");
+    strcat(string, "\nTrigger: ");
     strcat(string, alarm->trigger);
-    strcat(string, "\r\n\t\tProperties:\r\n");
+    strcat(string, "\nProperties:\n");
     strcat(string, property);
     free(property);
     return string;
@@ -1483,7 +1483,7 @@ char *printProperties(void *toBePrinted) {
     Property *aProperty = (Property *) toBePrinted;
     int length = strlen(aProperty->propName) + strlen(aProperty->propDescr) + 5;
     char *string = malloc(sizeof(char) * length);
-    strcpy(string, "\t\t-");
+    strcpy(string, "-");
     strcat(string, aProperty->propName);
     strcat(string, ":");
     strcat(string, aProperty->propDescr);
@@ -1996,37 +1996,82 @@ char **getRowInfo(Calendar *cal) {
     return result;
 }
 
-char *printEventForUI(const Event *event) {
-    if (event == NULL)
+Event *getTheNumEvent(int i, const Calendar *obj) {
+    ListIterator iter = createIterator(obj->events);
+    void *elem;
+    int count = 1;
+    while ((elem = nextElement(&iter)) != NULL) {
+        if (count == i) {
+            return elem;
+        } else {
+            count++;
+        }
+    }
+    return NULL;
+}
+
+char *printEventForUI(int i, const Calendar *obj) {
+    if (obj == NULL)
         return NULL;
+    Event *event = getTheNumEvent(i, obj);
+
     ListIterator iter = createIterator(event->properties);
-    char *property = malloc(sizeof(char) * 10);
-    strcpy(property, "");
+    char *property = malloc(sizeof(char) * 40);
+    strcpy(property, "\nEvent Optional Properties:\n");
     void *elem;
     while ((elem = nextElement(&iter)) != NULL) {
         char *temp = event->properties.printData(elem);
         property = realloc(property, sizeof(char) * (strlen(property) + strlen(temp) + 7));
         strcat(property, temp);
-        strcat(property, "\r\n");
+        strcat(property, "\n");
         free(temp);
     }
-    free(property);
     return property;
 }
 
 
-char *printAlarmForUI(const Event *event) {
+char *printAlarmForUI(int i, const Calendar *obj) {
+    if (obj == NULL)
+        return NULL;
+    Event *event = getTheNumEvent(i, obj);
+
     ListIterator iter2 = createIterator(event->alarms);
-    char *alarms = malloc(sizeof(char) * 10);
-    strcpy(alarms, "");
+    char *alarms = malloc(sizeof(char) * 20);
+    strcpy(alarms, "\nAll Alarms:\n");
     void *elem2;
     while ((elem2 = nextElement(&iter2)) != NULL) {
         char *temp = event->alarms.printData(elem2);
         alarms = realloc(alarms, sizeof(char) * (strlen(alarms) + strlen(temp) + 7));
         strcat(alarms, temp);
-        strcat(alarms, "\r\n");
+        strcat(alarms, "\n");
         free(temp);
     }
-    free(alarms);
     return alarms;
+}
+
+
+void addEventToCalForUI(Event *event, Calendar *obj) {
+    if (obj == NULL)
+        return;
+    if (event == NULL)
+        return;
+    insertBack(&(obj->events), event);
+}
+
+void createEvent(char *createDT, char *UID, char *startDT, Calendar *obj) {
+    if (createDT == NULL || UID == NULL || startDT == NULL || obj == NULL) {
+        return;
+    }
+    Event *tempEvent;
+    tempEvent = (Event *) malloc(sizeof(Event));
+    tempEvent->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+    tempEvent->alarms = initializeList(&printAlarm, &deleteAlarm, &comparAlarm);
+    strcpy(tempEvent->creationDateTime.date, getUTCDate(createDT));
+    strcpy(tempEvent->creationDateTime.time, getUTCTime(createDT));
+    tempEvent->creationDateTime.UTC = true;
+    strcpy(tempEvent->startDateTime.date, getUTCDate(startDT));
+    strcpy(tempEvent->startDateTime.time, getUTCTime(startDT));
+    tempEvent->startDateTime.UTC = true;
+    strcpy(tempEvent->UID, UID);
+    insertBack(&(obj->events), tempEvent);
 }

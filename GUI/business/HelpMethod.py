@@ -28,3 +28,18 @@ def newCalParameterArray(dict):
     array[3].value = dict['version'].encode('UTF-8')
     array[4].value = dict['UID'].encode('UTF-8')
     return array
+
+def newEventParameterArray(dict):
+    maxLength = 0
+    for key, value in dict.items():
+        if maxLength < len(value):
+            maxLength = len(value)
+
+    maxLength += 3
+    if len(dict) != 3:
+        return None
+    array = ((c_char * maxLength) * len(dict))()
+    array[0].value = dict['creationDateTime'].encode('UTF-8')
+    array[1].value = dict['startDateTime'].encode('UTF-8')
+    array[2].value = dict['UID'].encode('UTF-8')
+    return array

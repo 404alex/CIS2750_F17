@@ -297,7 +297,7 @@ char *printCalendar(const Calendar *obj) {
 char *printError(ICalErrorCode err) {
     switch (err) {
         case OK:
-            return "Allocated object\nFile parsed successfully\n";
+            return "\nSuccess\n";
         case INV_EVENT:
             return "Event Component is invalid. (No event, invalid opening closing tags. Event do not have uid. Event do not have stamp time. Event do not have valid start time end time pair.)\n";
         case INV_CAL:
@@ -369,3 +369,4 @@ ICalErrorCode validateCalendar(const Calendar *obj) {
     }
     return OK;
 }
+

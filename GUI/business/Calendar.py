@@ -43,9 +43,11 @@ getRowResult = cHelpLib.getRowInfo
 getRowResult.argtypes = [POINTER(Calendar)]
 getRowResult.restype = POINTER(c_char_p)
 printEveOp = cHelpLib.printEventForUI
-printEveOp.argtypes = [POINTER(Event.Event)]
-printEveOp.restype = POINTER(c_char_p)
-printEveAl = cHelpLib.printEventForUI
-printEveAl.argtypes = [POINTER(Event.Event)]
-printEveAl.restype = POINTER(c_char_p)
-
+printEveOp.argtypes = [c_int, POINTER(Calendar)]
+printEveOp.restype = c_char_p
+printEveAl = cHelpLib.printAlarmForUI
+printEveAl.argtypes = [c_int, POINTER(Calendar)]
+printEveAl.restype = c_char_p
+createEve = cHelpLib.createEvent
+createEve.argtypes = [c_char_p, c_char_p, c_char_p, POINTER(Calendar)]
+createEve.restype = None

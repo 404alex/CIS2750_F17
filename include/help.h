@@ -213,6 +213,8 @@ void createCalByGUI(float version, char *prodid, char *createDT, char *UID, char
 
 char **getRowInfo(Calendar *cal);
 
-char *printEventForUI(const Event *event);
+char *printEventForUI(int i, const Calendar *obj);
 
-char *printAlarmForUI(const Event *event);
+char *printAlarmForUI(int i, const Calendar *obj);
+
+void createEvent(char *createDT, char *UID, char *startDT, Calendar *obj);

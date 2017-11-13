@@ -23,7 +23,7 @@ class MainWindow(Tk):
             sys.exit(0)
 
     def save(*args):
-        if args[0]._filepath == '':
+        if len(args[0]._filepath) == 0:
             args[0].saveAs(args)
         else:
             returnResult = Calendar.writeCal(args[0]._filepath.encode('UTF-8'), args[0]._calObject)
@@ -53,6 +53,10 @@ class MainWindow(Tk):
             if result == False:
                 return
         args[0]._filepath = askopenfilename(filetypes=[("ICal File", "*.ics")])
+        if (len(args[0]._filepath) == 0):
+            return
+        strArray = args[0]._filepath.split('/')
+        args[0].changeTitle(strArray[len(strArray) - 1])
         returnResult = Calendar.createCal(args[0]._filepath.encode('UTF-8'), byref(args[0]._calObject))
         args[0].logInfoText(Calendar.printError(returnResult).decode('UTF-8'))
         if returnResult != 0:
@@ -64,7 +68,8 @@ class MainWindow(Tk):
         for i in range(arrayLength):
             list.append(rowResult[i + 1].decode('UTF-8'))
         _fileViewTree.delete(*_fileViewTree.get_children())
-        _fileViewTree.insert('', 'end', values=list[0].split('*SP*'))
+        for item in list:
+            _fileViewTree.insert('', 'end', values=item.split('*SP*'))
 
     def createCalendar(*args):
         if args[0]._calObject:
@@ -91,19 +96,34 @@ class MainWindow(Tk):
         args[0].logInfoText(Calendar.printError(c_int(0)).decode('UTF-8'))
 
     def createEvent(*args):
+        if not args[0]._calObject:
+            showerror('Error', 'Can not create event without create calender')
+            return
         eventWin = CreateEventWindow.CreateEventWindow(args[0])
         args[0].wait_window(eventWin.top)
-        # todo Event value return here
-        print(eventWin.eventArgs)
+        array = HelpMethod.newEventParameterArray(eventWin.eventArgs)
+        Calendar.createEve(array[0].value, array[2].value, array[1].value, args[0]._calObject)
+        rowResult = Calendar.getRowResult(args[0]._calObject)
+        list = []
+        arrayLength = int(rowResult[0].decode('UTF-8'))
+        for i in range(arrayLength):
+            list.append(rowResult[i + 1].decode('UTF-8'))
+        _fileViewTree.delete(*_fileViewTree.get_children())
+        for item in list:
+            _fileViewTree.insert('', 'end', values=item.split('*SP*'))
+        args[0].logInfoText(Calendar.printError(c_int(0)).decode('UTF-8'))
 
     def showAlarms(*args):
         selection = _fileViewTree.selection()
-
-        showerror('Not available', 'Not available')
+        alarm = Calendar.printEveAl(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
+            'UTF-8')
+        args[0].logInfoText(alarm)
 
     def extractProps(*args):
-        # todo open method
-        showerror('Not available', 'Not available')
+        selection = _fileViewTree.selection()
+        alarm = Calendar.printEveOp(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
+            'UTF-8')
+        args[0].logInfoText(alarm)
 
     def about(*args):
         AboutWindow.dialog()
@@ -217,7 +237,7 @@ class MainWindow(Tk):
             else:
                 pass
 
-        _fileViewTree.bind('<Button-3>', displayMenu)
+        _fileViewTree.bind('<ButtonRelease-3>', displayMenu)
 
     def changeTitle(self, fileName):
         self.title("iCalGUI - " + fileName)
