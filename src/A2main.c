@@ -86,6 +86,7 @@ int main() {
                     }
                 } while (fileError);
                 sleep(2);
+                getRowInfo(obj);
                 break;
             case '2':
                 if (obj == NULL) {

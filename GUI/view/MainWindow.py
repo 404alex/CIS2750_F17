@@ -14,7 +14,8 @@ import sys
 
 class MainWindow(Tk):
     _filepath = ''
-    _calObject = Calendar.Calendar()
+    _calObject = POINTER(Calendar.Calendar)()
+    _currentIndex = 0
 
     def close(*args):
         result = askyesno('Close program', 'Do you want to close?', parent=args[0])
@@ -37,14 +38,28 @@ class MainWindow(Tk):
 
     def open(*args):
         args[0]._filepath = askopenfilename(filetypes=[("ICal File", "*.ics")])
+        Calendar.createCal(args[0]._filepath.encode('UTF-8'), )
         # showinfo(_filepath,_filepath)
 
     def createCalendar(*args):
+        if args[0]._calObject:
+            result = askyesno('Create New Calendar',
+                              'One Cal obj in program, if continue, it will lost, make sure you already saved it.',
+                              parent=args[0])
+            if result == False:
+                return
+        _fileViewTree.delete(*_fileViewTree.get_children())
         calWin = CreateCalendarWindow.CreateCalendarWindow(args[0])
         args[0].wait_window(calWin.top)
         array = HelpMethod.newCalParameterArray(calWin.calArgs)
-        _calObjective = Calendar.createCalGui(2.0, array[2].value, array[0].value, array[4].value, array[1].value)
-        args[0].logInfoText(Calendar.printCal(_calObjective).decode('UTF-8'))
+        Calendar.createCalGui(2.0, array[2].value, array[0].value, array[4].value, array[1].value,
+                              byref(args[0]._calObject))
+        rowResult = Calendar.getRowResult(args[0]._calObject)
+        list = []
+        arrayLength = int(rowResult[0].decode('UTF-8'))
+        for i in range(arrayLength):
+            list.append(rowResult[i + 1].decode('UTF-8'))
+        _fileViewTree.insert('', 'end', values=list[0].split('*SP*'))
 
     def createEvent(*args):
         eventWin = CreateEventWindow.CreateEventWindow(args[0])
@@ -111,7 +126,8 @@ class MainWindow(Tk):
         scrollBar = Scrollbar(panel)
         scrollBar.pack(side=RIGHT, fill=Y)
         global _fileViewTree
-        _fileViewTree = Treeview(panel, columns=('c1', 'c2', 'c3', 'c4'), show='headings', yscrollcommand=scrollBar.set)
+        _fileViewTree = Treeview(panel, columns=('c1', 'c2', 'c3', 'c4'), show='headings',
+                                 yscrollcommand=scrollBar.set)
         _fileViewTree.column('c1', width=70, anchor='center')
         _fileViewTree.column('c2', width=70, anchor='center')
         _fileViewTree.column('c3', width=70, anchor='center')
@@ -132,11 +148,6 @@ class MainWindow(Tk):
                     return 'continue'
 
         _fileViewTree.bind('<Button-1>', listClick)
-
-        # test value
-        for i in range(50):
-            _fileViewTree.insert('', i, values=[str(i)] * 6)
-        # test value
 
     def makeLogPanel(self):
         panel = Frame(self)

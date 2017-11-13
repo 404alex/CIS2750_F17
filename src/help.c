@@ -1915,13 +1915,12 @@ char *writeCalendarString(const Calendar *obj) {
 }
 
 
-Calendar *createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT) {
-    Calendar *obj;
-    obj = (Calendar *) malloc(sizeof(Calendar));
-    obj->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
-    obj->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
-    obj->version = version;
-    strcpy(obj->prodID, prodid);
+void createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT, Calendar **obj) {
+    obj[0] = (Calendar *) malloc(sizeof(Calendar));
+    obj[0]->events = initializeList(&printEvent, &deleteEvent, &compareEvent);
+    obj[0]->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
+    obj[0]->version = version;
+    strcpy(obj[0]->prodID, prodid);
     Event *tempEvent;
     tempEvent = (Event *) malloc(sizeof(Event));
     tempEvent->properties = initializeList(&printProperties, &deleteProperties, &compareProperties);
@@ -1933,7 +1932,71 @@ Calendar *createCalByGUI(float version, char *prodid, char *createDT, char *UID,
     strcpy(tempEvent->startDateTime.time, getUTCTime(startDT));
     tempEvent->startDateTime.UTC = true;
     strcpy(tempEvent->UID, UID);
-    return obj;
+    insertBack(&(obj[0]->events), tempEvent);
+}
+
+char *getProperties(List properties, const Property *aProperty) {
+    ListIterator iter = createIterator(properties);
+    void *elem;
+    while ((elem = nextElement(&iter)) != NULL) {
+        Property *temp = (Property *) elem;
+        if (strlen(temp->propName) == 0 || strlen(temp->propDescr) == 0) {
+            return NULL;
+        }
+        if (compareProperties(aProperty, elem) == 0) {
+            return temp->propDescr;
+        }
+    }
+    return NULL;
+}
+
+
+char **getRowInfo(Calendar *cal) {
+    if (cal == NULL) {
+        return NULL;
+    }
+    if (cal->events.length == 0) {
+        return NULL;
+    }
+    char **result = malloc(sizeof(char *) * (cal->events.length + 1));
+    ListIterator iter = createIterator(cal->events);
+    void *elem;
+    int length = 0;
+    int i = 1;
+    Property *aProperty = malloc(sizeof(Property));
+    result[0] = malloc(sizeof(char) * 5);
+    sprintf(result[0], "%d", cal->events.length);
+    while ((elem = nextElement(&iter)) != NULL) {
+        Event *temp = (Event *) elem;
+        strcpy(aProperty->propName, "summary");
+        char *str = NULL;
+        if ((str = getProperties(temp->properties, aProperty)) != NULL) {
+            length = strlen(str) + 20;
+        } else {
+            length = 20;
+        }
+        result[i] = malloc(sizeof(char) * length);
+        char *tempString = malloc(sizeof(char) * 100);
+        sprintf(tempString, "%d", i);
+        strcpy(result[i], tempString);
+        strcat(result[i], "*SP*");
+        strcpy(tempString, "");
+        sprintf(tempString, "%d", temp->properties.length + 3);
+        strcat(result[i], tempString);
+        strcat(result[i], "*SP*");
+        strcpy(tempString, "");
+        sprintf(tempString, "%d", temp->alarms.length);
+        strcat(result[i], tempString);
+        if (str != NULL) {
+            strcat(result[i], "*SP*");
+            strcat(result[i], str);
+        }
+        i++;
+        free(tempString);
+        length = 0;
+    }
+    deleteProperties(aProperty);
+    return result;
 }
 
 

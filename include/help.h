@@ -209,4 +209,6 @@ char *foldWritenString(char *string);
 
 char *writeCalendarString(const Calendar *obj);
 
-Calendar *createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT);
+void createCalByGUI(float version, char *prodid, char *createDT, char *UID, char *startDT, Calendar **obj);
+
+char **getRowInfo(Calendar *cal);
