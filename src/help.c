@@ -2075,3 +2075,10 @@ void createEvent(char *createDT, char *UID, char *startDT, Calendar *obj) {
     strcpy(tempEvent->UID, UID);
     insertBack(&(obj->events), tempEvent);
 }
+
+void freeString(char *str) {
+    if (str == NULL) {
+        return;
+    }
+    free(str);
+}

@@ -20,9 +20,14 @@ class MainWindow(Tk):
     def close(*args):
         result = askyesno('Close program', 'Do you want to close?', parent=args[0])
         if result:
+            if args[0]._calObject:
+                Calendar.deleteCal(args[0]._calObject)
             sys.exit(0)
 
     def save(*args):
+        if not args[0]._calObject:
+            showerror('Error','You can not save, you need create or open a calendar first')
+            return
         if len(args[0]._filepath) == 0:
             args[0].saveAs(args)
         else:
@@ -33,6 +38,9 @@ class MainWindow(Tk):
             return
 
     def saveAs(*args):
+        if not args[0]._calObject:
+            showerror('Error','You can not save, you need create or open a calendar first')
+            return
         args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")])
         if (len(args[0]._filepath) <= 4):
             return 'Continue'
@@ -52,6 +60,8 @@ class MainWindow(Tk):
                               parent=args[0])
             if result == False:
                 return
+            else:
+                Calendar.deleteCal(args[0]._calObject)
         args[0]._filepath = askopenfilename(filetypes=[("ICal File", "*.ics")])
         if (len(args[0]._filepath) == 0):
             return
@@ -78,7 +88,8 @@ class MainWindow(Tk):
                               parent=args[0])
             if result == False:
                 return
-
+            else:
+                Calendar.deleteCal(args[0]._calObject)
         calWin = CreateCalendarWindow.CreateCalendarWindow(args[0])
         args[0].wait_window(calWin.top)
         if (len(calWin.calArgs) == 0):
@@ -150,6 +161,7 @@ class MainWindow(Tk):
         self.bind_all('<Control-x>', self.close)
         self.bind_all('<Control-s>', self.save)
         self.bind_all('<Control-o>', self.open)
+        self.bind_all('<Control-m>', self.saveAs)
         self.makeRightClickMenu()
         self.protocol('WM_DELETE_WINDOW', self.close)
 

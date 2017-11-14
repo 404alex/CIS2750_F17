@@ -51,3 +51,6 @@ printEveAl.restype = c_char_p
 createEve = cHelpLib.createEvent
 createEve.argtypes = [c_char_p, c_char_p, c_char_p, POINTER(Calendar)]
 createEve.restype = None
+freeString = cHelpLib.freeString
+freeString.argtypes = [c_char_p]
+freeString.restype = None
