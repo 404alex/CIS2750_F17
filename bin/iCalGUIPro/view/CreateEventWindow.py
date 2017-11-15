@@ -1,5 +1,5 @@
 from tkinter import *
-from GUI.business import HelpMethod
+from ..business import HelpMethod
 from tkinter.messagebox import *
 import uuid
 from datetime import datetime, timezone

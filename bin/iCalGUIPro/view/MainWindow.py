@@ -4,8 +4,8 @@ from tkinter.filedialog import *
 from tkinter.simpledialog import *
 from tkinter.ttk import Treeview
 from . import AboutWindow
-from GUI.business import HelpMethod
-from GUI.business import Calendar
+from ..business import HelpMethod
+from ..business import Calendar
 from . import CreateCalendarWindow
 from . import CreateEventWindow
 from ctypes import *
@@ -190,7 +190,7 @@ class MainWindow(Tk):
     def makeMenuFile(self, menuFile, menuBar):
         menuFile.add_command(label='Open...', command=self.open, accelerator='Ctrl+O', underline=0)
         menuFile.add_command(label='Save', command=self.save, accelerator='Ctrl+S', underline=0)
-        menuFile.add_command(label='Save as...', command=self.saveAs, underline=1)
+        menuFile.add_command(label='Save as...', command=self.saveAs, accelerator='Ctrl+M', underline=1)
         menuFile.add_separator()
         menuFile.add_command(label='Exit', command=self.close, accelerator='Ctrl+X', underline=0)
         menuBar.add_cascade(label='File', menu=menuFile, underline=0)
