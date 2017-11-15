@@ -1,3 +1,4 @@
+# some code from the book: programming python 4th edition
 from tkinter.messagebox import *
 from tkinter.filedialog import *
 from tkinter.simpledialog import *
@@ -26,7 +27,7 @@ class MainWindow(Tk):
 
     def save(*args):
         if not args[0]._calObject:
-            showerror('Error','You can not save, you need create or open a calendar first')
+            showerror('Error', 'You can not save, you need create or open a calendar first')
             return
         if len(args[0]._filepath) == 0:
             args[0].saveAs(args)
@@ -39,7 +40,7 @@ class MainWindow(Tk):
 
     def saveAs(*args):
         if not args[0]._calObject:
-            showerror('Error','You can not save, you need create or open a calendar first')
+            showerror('Error', 'You can not save, you need create or open a calendar first')
             return
         args[0]._filepath = asksaveasfilename(filetypes=[("ICal File", "*.ics")])
         if (len(args[0]._filepath) <= 4):
@@ -52,6 +53,27 @@ class MainWindow(Tk):
             showerror('Error', 'Cannot Save...')
         return
         # showinfo(args[0]._filepath, args[0]._filepath)
+
+    def deleteEvent(*args):
+        if len(_fileViewTree.get_children()) == 1:
+            showerror('Error', 'Only one event remining, you cannot delete it')
+            return
+        selection = _fileViewTree.selection()
+        resultofDelete = askyesno('Info',
+                                  'Are you sure to delete No. ' + str(
+                                      _fileViewTree.item(selection)['values'][0]) + 'event?')
+        if not resultofDelete:
+            return
+        result = Calendar.deleteEve(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject)
+        args[0].logInfoText(Calendar.printError(result).decode('UTF-8'))
+        rowResult = Calendar.getRowResult(args[0]._calObject)
+        list = []
+        arrayLength = int(rowResult[0].decode('UTF-8'))
+        for i in range(arrayLength):
+            list.append(rowResult[i + 1].decode('UTF-8'))
+        _fileViewTree.delete(*_fileViewTree.get_children())
+        for item in list:
+            _fileViewTree.insert('', 'end', values=item.split('*SP*'))
 
     def open(*args):
         if args[0]._calObject:
@@ -132,9 +154,9 @@ class MainWindow(Tk):
 
     def extractProps(*args):
         selection = _fileViewTree.selection()
-        alarm = Calendar.printEveOp(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
+        property = Calendar.printEveOp(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
             'UTF-8')
-        args[0].logInfoText(alarm)
+        args[0].logInfoText(property)
 
     def about(*args):
         AboutWindow.dialog()
@@ -240,6 +262,7 @@ class MainWindow(Tk):
         menu = Menu(self, tearoff=0)
         menu.add_command(label='Show Alarms', command=self.showAlarms)
         menu.add_command(label='Extract optional props', command=self.extractProps)
+        menu.add_command(label='Delete this event', command=self.deleteEvent)
 
         def displayMenu(event):
             item = _fileViewTree.identify_row(event.y)

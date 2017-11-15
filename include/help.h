@@ -220,3 +220,5 @@ char *printAlarmForUI(int i, const Calendar *obj);
 void createEvent(char *createDT, char *UID, char *startDT, Calendar *obj);
 
 void freeString(char *str);
+
+ICalErrorCode deleteEventforUI(int i, Calendar *obj);

@@ -2082,3 +2082,12 @@ void freeString(char *str) {
     }
     free(str);
 }
+
+ICalErrorCode deleteEventforUI(int i, Calendar *obj) {
+    if (obj == NULL)
+        return OTHER_ERROR;
+    Event *event = getTheNumEvent(i, obj);
+    deleteDataFromList(&(obj->events), event);
+    obj->events.deleteData(event);
+    return OK;
+}
