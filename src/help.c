@@ -2091,3 +2091,87 @@ ICalErrorCode deleteEventforUI(int i, Calendar *obj) {
     obj->events.deleteData(event);
     return OK;
 }
+
+char **getEventInfoForDB(Calendar *cal) {
+    if (cal == NULL) {
+        return NULL;
+    }
+    if (cal->events.length == 0) {
+        return NULL;
+    }
+    char **result = malloc(sizeof(char *) * (cal->events.length + 1));
+    ListIterator iter = createIterator(cal->events);
+    void *elem;
+    int length = 0;
+    int i = 1;
+    Property *aProperty = malloc(sizeof(Property));
+    result[0] = malloc(sizeof(char) * 5);
+    sprintf(result[0], "%d", cal->events.length);
+    while ((elem = nextElement(&iter)) != NULL) {
+        Event *temp = (Event *) elem;
+        strcpy(aProperty->propName, "summary");
+        char *strSummary = NULL;
+        if ((strSummary = getProperties(temp->properties, aProperty)) != NULL) {
+            length = strlen(strSummary) + 20;
+        } else {
+            length = 20;
+        }
+        char *strLocation = NULL;
+        strcpy(aProperty->propName, "location");
+        if ((strLocation = getProperties(temp->properties, aProperty)) != NULL) {
+            length = strlen(strLocation) + 20;
+        } else {
+            length = 20;
+        }
+
+        char *strOrgnaizer = NULL;
+        strcpy(aProperty->propName, "organizer");
+        if ((strOrgnaizer = getProperties(temp->properties, aProperty)) != NULL) {
+            length = strlen(strOrgnaizer) + 20;
+        } else {
+            length = 20;
+        }
+
+        char *strDtStart = malloc(sizeof(char) * 100);
+        strcpy(strDtStart, temp->startDateTime.date);
+        strcat(strDtStart, temp->startDateTime.time);
+
+        char *strNumofAl = malloc(sizeof(char) * 100);
+        sprintf(strNumofAl, "%d", temp->alarms.length);
+        result[i] = malloc(sizeof(char) * length);
+        if (strSummary == NULL)
+            strcpy(result[i], "*SP*");
+        else {
+            strcpy(result[i], strSummary);
+            strcat(result[i], "*SP*");
+        }
+        if (strDtStart == NULL)
+            strcat(result[i], "*SP*");
+        else {
+            strcat(result[i], strDtStart);
+            strcat(result[i], "*SP*");
+        }
+        if (strLocation == NULL)
+            strcat(result[i], "*SP*");
+        else {
+            strcat(result[i], strLocation);
+            strcat(result[i], "*SP*");
+        }
+        if (strOrgnaizer == NULL)
+            strcat(result[i], "*SP*");
+        else {
+            strcat(result[i], strOrgnaizer);
+            strcat(result[i], "*SP*");
+        }
+        if (strNumofAl == NULL)
+            strcat(result[i], "*SP*");
+        else {
+            strcat(result[i], strNumofAl);
+        }
+        i++;
+        free(strDtStart);
+        length = 0;
+    }
+    deleteProperties(aProperty);
+    return result;
+}

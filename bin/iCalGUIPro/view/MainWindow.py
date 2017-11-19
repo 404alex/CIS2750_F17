@@ -17,6 +17,7 @@ class MainWindow(Tk):
     _filepath = ''
     _calObject = POINTER(Calendar.Calendar)()
     _currentIndex = 0
+    _dbContext = None
 
     def close(*args):
         result = askyesno('Close program', 'Do you want to close?', parent=args[0])
@@ -161,12 +162,33 @@ class MainWindow(Tk):
         AboutWindow.dialog()
 
     def saveAllEvent(*args):
-        # todo save all events
-        showinfo('Not finished', 'Not finished')
+        if not args[0]._calObject:
+            showerror('Error', 'Can not storage to db, you need create or open a calendar first')
+            return
+        eventListForDB = Calendar.getEventForDB(args[0]._calObject)
+        list = []
+        arrayLength = int(eventListForDB[0].decode('UTF-8'))
+        for i in range(arrayLength):
+            list.append(eventListForDB[i + 1].decode('UTF-8').split('*SP*'))
+        for items in list:
+            if len(items[3] != 0):
+                args[0]._dbContext.saveOrganizer(items[3])
+
+        # queryValueList = ''
+        # for item in items:
+        #     queryValueList = queryValueList + item + ','
+        # saveAllEventCommand = 'INSERT INTO EVENT'
+        # todo save to db
 
     def saveCurrEvent(*args):
-        # todo save current events
-        showinfo('Not finished', 'Not finished')
+        if not args[0]._calObject:
+            showerror('Error', 'Can not storage to db, you need create or open a calendar first')
+            return
+        selection = _fileViewTree.selection()
+        if (len(selection) == 0):
+            showerror('Error', 'Can not storage to db, you need select an Event first')
+            return
+        # todo save to db
 
     def clearDB(*args):
         # todo delete all data in db
@@ -185,7 +207,8 @@ class MainWindow(Tk):
         _globelLogInfoText.delete('1.0', END)
         _globelLogInfoText.config(state=DISABLED)
 
-    def __init__(self):
+    def __init__(self, dbContext):
+        self._dbContext = dbContext
         Tk.__init__(self)
         HelpMethod.centerOfWindow(self, 580, 485)
         self.resizable(width=False, height=False)

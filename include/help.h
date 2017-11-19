@@ -222,3 +222,5 @@ void createEvent(char *createDT, char *UID, char *startDT, Calendar *obj);
 void freeString(char *str);
 
 ICalErrorCode deleteEventforUI(int i, Calendar *obj);
+
+char **getEventInfoForDB(Calendar *cal);
