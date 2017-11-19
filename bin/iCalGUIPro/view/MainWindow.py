@@ -52,7 +52,6 @@ class MainWindow(Tk):
         if returnResult != 0:
             showerror('Error', 'Cannot Save...')
         return
-        # showinfo(args[0]._filepath, args[0]._filepath)
 
     def deleteEvent(*args):
         if len(_fileViewTree.get_children()) == 1:
@@ -161,6 +160,26 @@ class MainWindow(Tk):
     def about(*args):
         AboutWindow.dialog()
 
+    def saveAllEvent(*args):
+        # todo save all events
+        showinfo('Not finished', 'Not finished')
+
+    def saveCurrEvent(*args):
+        # todo save current events
+        showinfo('Not finished', 'Not finished')
+
+    def clearDB(*args):
+        # todo delete all data in db
+        showinfo('Not finished', 'Not finished')
+
+    def disDBStatus(*args):
+        # todo db status line
+        showinfo('Not finished', 'Not finished')
+
+    def exeQuery(*args):
+        # todo db query function
+        showinfo('Not finished', 'Not finished')
+
     def cleanOnClick(*args):
         _globelLogInfoText.config(state=NORMAL)
         _globelLogInfoText.delete('1.0', END)
@@ -173,11 +192,13 @@ class MainWindow(Tk):
         menuBar = Menu(self)
         menuFile = Menu(menuBar, tearoff=False)
         menuCreate = Menu(menuBar, tearoff=False)
+        menuDataBase = Menu(menuBar, tearoff=False)
         menuHelp = Menu(menuBar, tearoff=False)
         self.makeFileViewPanel()
         self.makeLogPanel()
         self.makeMenuFile(menuFile, menuBar)
         self.makeMenuCreate(menuCreate, menuBar)
+        self.makeMenuDB(menuDataBase, menuBar)
         self.makeMenuHelp(menuHelp, menuBar)
         self.config(menu=menuBar)
         self.bind_all('<Control-x>', self.close)
@@ -203,6 +224,14 @@ class MainWindow(Tk):
     def makeMenuHelp(self, menuHelp, menuBar):
         menuHelp.add_command(label='About iCalGUI...', command=self.about, underline=0)
         menuBar.add_cascade(label='Help', menu=menuHelp, underline=0)
+
+    def makeMenuDB(self, menuDataBase, menuBar):
+        menuDataBase.add_command(label='Store All Events', command=self.saveAllEvent, underline=0)
+        menuDataBase.add_command(label='Store Current Events', command=self.saveCurrEvent, underline=1)
+        menuDataBase.add_command(label='Clear All Data', command=self.clearDB, underline=0)
+        menuDataBase.add_command(label='Display DB Status', command=self.disDBStatus, underline=0)
+        menuDataBase.add_command(label='Execute Query', command=self.exeQuery, underline=0)
+        menuBar.add_cascade(label='Database', menu=menuDataBase, underline=0)
 
     def makeFileViewPanel(self):
         panel = Frame(self)
