@@ -24,6 +24,7 @@ class MainWindow(Tk):
         if result:
             if args[0]._calObject:
                 Calendar.deleteCal(args[0]._calObject)
+            args[0]._dbContext.closeConnection()
             sys.exit(0)
 
     def save(*args):

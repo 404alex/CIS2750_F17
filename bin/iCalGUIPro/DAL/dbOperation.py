@@ -54,4 +54,14 @@ class dbOperation():
         _cursor.execute('SELECT * FROM ORGANIZER ')
 
         _cursor.execute('INSERT INTO ORGANIZER (name,contact) VALUES (' + name + ',' + contact + ')')
+        _cursor.close()
+
+
+    def deleteAllData(self):
+        _cursor = self._conn.cursor()
+        _cursor.execute('DELETE FROM EVENT')
+        _cursor.close()
+
+    def closeConnection(self):
+        self._conn.close()
 # 'mysql+mysqlconnector://' + USR + ':' + PWD + '@131.104.48.64:3306/' + USR
