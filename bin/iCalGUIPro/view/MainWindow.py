@@ -172,14 +172,31 @@ class MainWindow(Tk):
         for i in range(arrayLength):
             list.append(eventListForDB[i + 1].decode('UTF-8').split('*SP*'))
         for items in list:
-            if len(items[3] != 0):
-                args[0]._dbContext.saveOrganizer(items[3])
-
-        queryValueList = ''
-        for item in items:
-            queryValueList = queryValueList + item + ','
-        print(queryValueList)
-        saveAllEventCommand = 'INSERT INTO EVENT'
+            if len(items[3]) != 0:
+                orgid = args[0]._dbContext.saveOrganizer(items[3])
+                queryValueList = ''
+                for j in range(len(items)):
+                    if len(items[j]) == 0 and j != 0:
+                        queryValueList = queryValueList + "NULL,"
+                    elif j != 3:
+                        queryValueList = queryValueList + "'" + items[j] + "',"
+                    else:
+                        queryValueList = queryValueList + "'" + str(orgid) + "',"
+                saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
+                                      "location,organizer,num_alarms) " \
+                                      "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
+                args[0]._dbContext.saveEvent(saveAllEventCommand)
+            else:
+                queryValueList = ''
+                for j in range(len(items)):
+                    if len(items[j]) == 0 and j != 0:
+                        queryValueList = queryValueList + "NULL,"
+                    else:
+                        queryValueList = queryValueList + "'" + items[j] + "',"
+                saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
+                                      "location,organizer,num_alarms) " \
+                                      "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
+                args[0]._dbContext.saveEvent(saveAllEventCommand)
 
     def saveCurrEvent(*args):
         if not args[0]._calObject:
@@ -189,11 +206,10 @@ class MainWindow(Tk):
         if (len(selection) == 0):
             showerror('Error', 'Can not storage to db, you need select an Event first')
             return
-        # todo save to db
+
 
     def clearDB(*args):
-        # todo delete all data in db
-        showinfo('Not finished', 'Not finished')
+        args[0]._dbContext.deleteAllData()
 
     def disDBStatus(*args):
         # todo db status line

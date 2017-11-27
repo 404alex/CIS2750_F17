@@ -57,3 +57,6 @@ deleteEve.restype = c_int
 getEventForDB = cHelpLib.getEventInfoForDB
 getEventForDB.argtypes = [POINTER(Calendar)]
 getEventForDB.restype = POINTER(c_char_p)
+getOneEventForDB = cHelpLib.getOneEventInfoForDB
+getOneEventForDB.argtypes = [c_int, POINTER(Calendar)]
+getOneEventForDB.restype = c_char_p

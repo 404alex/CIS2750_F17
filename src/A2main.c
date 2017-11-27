@@ -6,6 +6,7 @@
 #include <regex.h>
 #include "CalendarParser.h"
 #include "help.h"
+
 int main() {
     bool flag = true;
     char input[100];
@@ -86,7 +87,7 @@ int main() {
                     }
                 } while (fileError);
                 sleep(2);
-                getRowInfo(obj);
+                printf(getOneEventInfoForDB(1, obj));
                 break;
             case '2':
                 if (obj == NULL) {

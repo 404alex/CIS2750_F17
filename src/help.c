@@ -2099,7 +2099,7 @@ char **getEventInfoForDB(Calendar *cal) {
     if (cal->events.length == 0) {
         return NULL;
     }
-    char **result = malloc(sizeof(char *) * (cal->events.length + 1));
+    char **result = malloc(sizeof(char *) * (cal->events.length + 5));
     ListIterator iter = createIterator(cal->events);
     void *elem;
     int length = 0;
@@ -2138,7 +2138,7 @@ char **getEventInfoForDB(Calendar *cal) {
 
         char *strNumofAl = malloc(sizeof(char) * 100);
         sprintf(strNumofAl, "%d", temp->alarms.length);
-        result[i] = malloc(sizeof(char) * length);
+        result[i] = malloc(sizeof(char) * (length + 100));
         if (strSummary == NULL)
             strcpy(result[i], "*SP*");
         else {
@@ -2173,5 +2173,74 @@ char **getEventInfoForDB(Calendar *cal) {
         length = 0;
     }
     deleteProperties(aProperty);
+    return result;
+}
+
+char *getOneEventInfoForDB(int i, const Calendar *obj) {
+    if (obj == NULL)
+        return NULL;
+    Event *temp = getTheNumEvent(i, obj);
+    int length = 0;
+    Property *aProperty = malloc(sizeof(Property));
+    strcpy(aProperty->propName, "summary");
+    char *strSummary = NULL;
+    if ((strSummary = getProperties(temp->properties, aProperty)) != NULL) {
+        length = strlen(strSummary) + 20;
+    } else {
+        length = 20;
+    }
+    char *strLocation = NULL;
+    strcpy(aProperty->propName, "location");
+    if ((strLocation = getProperties(temp->properties, aProperty)) != NULL) {
+        length = strlen(strLocation) + 20;
+    } else {
+        length = 20;
+    }
+
+    char *strOrgnaizer = NULL;
+    strcpy(aProperty->propName, "organizer");
+    if ((strOrgnaizer = getProperties(temp->properties, aProperty)) != NULL) {
+        length = strlen(strOrgnaizer) + 20;
+    } else {
+        length = 20;
+    }
+
+    char *strDtStart = malloc(sizeof(char) * 100);
+    strcpy(strDtStart, temp->startDateTime.date);
+    strcat(strDtStart, temp->startDateTime.time);
+
+    char *strNumofAl = malloc(sizeof(char) * 100);
+    sprintf(strNumofAl, "%d", temp->alarms.length);
+    char * result = malloc(sizeof(char) * (length + 100));
+    if (strSummary == NULL)
+        strcpy(result, "*SP*");
+    else {
+        strcpy(result, strSummary);
+        strcat(result, "*SP*");
+    }
+    if (strDtStart == NULL)
+        strcat(result, "*SP*");
+    else {
+        strcat(result, strDtStart);
+        strcat(result, "*SP*");
+    }
+    if (strLocation == NULL)
+        strcat(result, "*SP*");
+    else {
+        strcat(result, strLocation);
+        strcat(result, "*SP*");
+    }
+    if (strOrgnaizer == NULL)
+        strcat(result, "*SP*");
+    else {
+        strcat(result, strOrgnaizer);
+        strcat(result, "*SP*");
+    }
+    if (strNumofAl == NULL)
+        strcat(result, "*SP*");
+    else {
+        strcat(result, strNumofAl);
+    }
+    free(strDtStart);
     return result;
 }

@@ -45,22 +45,43 @@ class dbOperation():
         _cursor.close()
 
     def saveOrganizer(self, str):
-        matchName = re.search(r'CN[ ]*=[ ]*', str, re.IGNORECASE)
-        matchContact = re.search(r'[ ]*:[a-z ]+:[ ]*', str, re.IGNORECASE)
-        mContact = re.search(r':[a-z ]+:[ ]*', str, re.IGNORECASE)
-        name = str[matchName[1]:(matchContact[0] + 1)]
-        contact = str[(mContact[0] + 1):len(str)]
-        _cursor = self._conn.cursor()
-        _cursor.execute('SELECT * FROM ORGANIZER ')
+        try:
+            matchName = re.search(r'CN[ ]*=[ ]*', str, re.IGNORECASE)
+            matchContact = re.search(r'[ ]*[;:][a-z ]+[;:][ ]*', str, re.IGNORECASE)
+            mContact = re.search(r'[;:][a-z ]+[;:][ ]*', str, re.IGNORECASE)
+            name = str[matchName.span()[1]:matchContact.span()[0]]
+            contact = str[(mContact.span()[0] + 1):len(str)]
+            _cursor = self._conn.cursor()
+            str1 = "INSERT INTO ORGANIZER (name,contact) VALUES ('" + name + "','" + contact + "')"
+            _cursor.execute(str1)
+            id = _cursor.lastrowid
+            _cursor.close()
+            return id
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting {}', format(err))
+            exit(0)
 
-        _cursor.execute('INSERT INTO ORGANIZER (name,contact) VALUES (' + name + ',' + contact + ')')
-        _cursor.close()
-
+    def saveEvent(self, str):
+        try:
+            _cursor = self._conn.cursor()
+            _cursor.execute(str)
+            id = _cursor.lastrowid
+            _cursor.close()
+            self._conn.commit()
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting {}', format(err))
+            exit(0)
 
     def deleteAllData(self):
-        _cursor = self._conn.cursor()
-        _cursor.execute('DELETE FROM EVENT')
-        _cursor.close()
+        try:
+            _cursor = self._conn.cursor()
+            _cursor.execute('DELETE FROM EVENT')
+            _cursor.execute('DELETE FROM ORGANIZER')
+            _cursor.close()
+            self._conn.commit()
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting {}', format(err))
+            exit(0)
 
     def closeConnection(self):
         self._conn.close()

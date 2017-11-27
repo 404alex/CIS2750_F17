@@ -224,3 +224,5 @@ void freeString(char *str);
 ICalErrorCode deleteEventforUI(int i, Calendar *obj);
 
 char **getEventInfoForDB(Calendar *cal);
+
+char *getOneEventInfoForDB(int i, const Calendar *obj);
