@@ -175,11 +175,11 @@ class MainWindow(Tk):
             if len(items[3] != 0):
                 args[0]._dbContext.saveOrganizer(items[3])
 
-        # queryValueList = ''
-        # for item in items:
-        #     queryValueList = queryValueList + item + ','
-        # saveAllEventCommand = 'INSERT INTO EVENT'
-        # todo save to db
+        queryValueList = ''
+        for item in items:
+            queryValueList = queryValueList + item + ','
+        print(queryValueList)
+        saveAllEventCommand = 'INSERT INTO EVENT'
 
     def saveCurrEvent(*args):
         if not args[0]._calObject:
