@@ -8,6 +8,7 @@ from ..business import HelpMethod
 from ..business import Calendar
 from . import CreateCalendarWindow
 from . import CreateEventWindow
+from . import QueryWindow
 from ctypes import *
 
 import sys
@@ -19,7 +20,7 @@ class MainWindow(Tk):
     _currentIndex = 0
     _dbContext = None
 
-    def close(*args):
+    def close(*args):  #close program
         result = askyesno('Close program', 'Do you want to close?', parent=args[0])
         if result:
             if args[0]._calObject:
@@ -27,7 +28,7 @@ class MainWindow(Tk):
             args[0]._dbContext.closeConnection()
             sys.exit(0)
 
-    def save(*args):
+    def save(*args):    #save to file
         if not args[0]._calObject:
             showerror('Error', 'You can not save, you need create or open a calendar first')
             return
@@ -40,7 +41,7 @@ class MainWindow(Tk):
                 showerror('Error', 'Cannot Save...')
             return
 
-    def saveAs(*args):
+    def saveAs(*args):  #save to different location
         if not args[0]._calObject:
             showerror('Error', 'You can not save, you need create or open a calendar first')
             return
@@ -55,7 +56,7 @@ class MainWindow(Tk):
             showerror('Error', 'Cannot Save...')
         return
 
-    def deleteEvent(*args):
+    def deleteEvent(*args): #delete specific event
         if len(_fileViewTree.get_children()) == 1:
             showerror('Error', 'Only one event remining, you cannot delete it')
             return
@@ -76,7 +77,7 @@ class MainWindow(Tk):
         for item in list:
             _fileViewTree.insert('', 'end', values=item.split('*SP*'))
 
-    def open(*args):
+    def open(*args):    #open a new file
         if args[0]._calObject:
             result = askyesno('Create New Calendar',
                               'One Cal obj in program, if continue, it will lost, make sure you already saved it.',
@@ -94,6 +95,7 @@ class MainWindow(Tk):
         args[0].logInfoText(Calendar.printError(returnResult).decode('UTF-8'))
         if returnResult != 0:
             showerror('Error', 'File not valid, read fail.')
+            _fileViewTree.delete(*_fileViewTree.get_children())
             return
         rowResult = Calendar.getRowResult(args[0]._calObject)
         list = []
@@ -104,7 +106,7 @@ class MainWindow(Tk):
         for item in list:
             _fileViewTree.insert('', 'end', values=item.split('*SP*'))
 
-    def createCalendar(*args):
+    def createCalendar(*args):  #create a new calendar object
         if args[0]._calObject:
             result = askyesno('Create New Calendar',
                               'One Cal obj in program, if continue, it will lost, make sure you already saved it.',
@@ -129,7 +131,7 @@ class MainWindow(Tk):
         _fileViewTree.insert('', 'end', values=list[0].split('*SP*'))
         args[0].logInfoText(Calendar.printError(c_int(0)).decode('UTF-8'))
 
-    def createEvent(*args):
+    def createEvent(*args):     #create a new event object to a calendar object
         if not args[0]._calObject:
             showerror('Error', 'Can not create event without create calender')
             return
@@ -147,19 +149,19 @@ class MainWindow(Tk):
             _fileViewTree.insert('', 'end', values=item.split('*SP*'))
         args[0].logInfoText(Calendar.printError(c_int(0)).decode('UTF-8'))
 
-    def showAlarms(*args):
+    def showAlarms(*args):      #display alarms
         selection = _fileViewTree.selection()
         alarm = Calendar.printEveAl(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
             'UTF-8')
         args[0].logInfoText(alarm)
 
-    def extractProps(*args):
+    def extractProps(*args):        #display optional properties
         selection = _fileViewTree.selection()
         property = Calendar.printEveOp(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
             'UTF-8')
         args[0].logInfoText(property)
 
-    def about(*args):
+    def about(*args):       #about windows.
         AboutWindow.dialog()
 
     def saveAllEvent(*args):
@@ -185,7 +187,7 @@ class MainWindow(Tk):
                 saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
                                       "location,organizer,num_alarms) " \
                                       "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
-                args[0]._dbContext.saveEvent(saveAllEventCommand)
+                resval = args[0]._dbContext.saveEvent(saveAllEventCommand)
             else:
                 queryValueList = ''
                 for j in range(len(items)):
@@ -196,7 +198,9 @@ class MainWindow(Tk):
                 saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
                                       "location,organizer,num_alarms) " \
                                       "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
-                args[0]._dbContext.saveEvent(saveAllEventCommand)
+                resval = args[0]._dbContext.saveEvent(saveAllEventCommand)
+            args[0].logInfoText(resval)
+        args[0].logInfoText(args[0]._dbContext.status())
 
     def saveCurrEvent(*args):
         if not args[0]._calObject:
@@ -206,18 +210,48 @@ class MainWindow(Tk):
         if (len(selection) == 0):
             showerror('Error', 'Can not storage to db, you need select an Event first')
             return
+        selection = _fileViewTree.selection()
+        eventForDB = Calendar.getOneEventForDB(c_int(_fileViewTree.item(selection)['values'][0]), args[0]._calObject).decode(
+            'UTF-8').split('*SP*')
+        if len(eventForDB[3]) != 0:
+            orgid = args[0]._dbContext.saveOrganizer(eventForDB[3])
+            queryValueList = ''
+            for j in range(len(eventForDB)):
+                if len(eventForDB[j]) == 0 and j != 0:
+                    queryValueList = queryValueList + "NULL,"
+                elif j != 3:
+                    queryValueList = queryValueList + "'" + eventForDB[j] + "',"
+                else:
+                    queryValueList = queryValueList + "'" + str(orgid) + "',"
+            saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
+                                  "location,organizer,num_alarms) " \
+                                  "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
+            resval = args[0]._dbContext.saveEvent(saveAllEventCommand)
+        else:
+            queryValueList = ''
+            for j in range(len(eventForDB)):
+                if len(eventForDB[j]) == 0 and j != 0:
+                    queryValueList = queryValueList + "NULL,"
+                else:
+                    queryValueList = queryValueList + "'" + eventForDB[j] + "',"
+            saveAllEventCommand = "INSERT INTO EVENT (summary,start_time," \
+                                  "location,organizer,num_alarms) " \
+                                  "values (" + queryValueList[0:len(queryValueList) - 1] + ")"
+            resval = args[0]._dbContext.saveEvent(saveAllEventCommand)
+        args[0].logInfoText(resval)
+        args[0].logInfoText(args[0]._dbContext.status())
 
 
     def clearDB(*args):
-        args[0]._dbContext.deleteAllData()
+        resval = args[0]._dbContext.deleteAllData()
+        args[0].logInfoText(resval)
 
     def disDBStatus(*args):
-        # todo db status line
-        showinfo('Not finished', 'Not finished')
+        resval = args[0]._dbContext.status()
+        args[0].logInfoText(resval)
 
     def exeQuery(*args):
-        # todo db query function
-        showinfo('Not finished', 'Not finished')
+        query = QueryWindow.QueryWindow(args[0]._dbContext)
 
     def cleanOnClick(*args):
         _globelLogInfoText.config(state=NORMAL)

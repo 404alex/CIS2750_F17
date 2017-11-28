@@ -68,6 +68,7 @@ class dbOperation():
             id = _cursor.lastrowid
             _cursor.close()
             self._conn.commit()
+            return 'Insert Success\n'
         except mysql.connector.Error as err:
             print('Something wrong, exiting {}', format(err))
             exit(0)
@@ -79,10 +80,48 @@ class dbOperation():
             _cursor.execute('DELETE FROM ORGANIZER')
             _cursor.close()
             self._conn.commit()
+            stat = self.status()
+            return 'Delete Success\n' + stat
         except mysql.connector.Error as err:
             print('Something wrong, exiting {}', format(err))
             exit(0)
 
     def closeConnection(self):
         self._conn.close()
+
+    def status(self):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute('SELECT * FROM EVENT')
+            eventRowCount = _cursor.rowcount
+            _cursor.execute('SELECT * FROM ORGANIZER')
+            orgRowCount = _cursor.rowcount
+            _cursor.close()
+            return 'Database has ' + str(orgRowCount) + ' organizers and ' + str(eventRowCount) + ' events\n'
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting {}', format(err))
+            exit(0)
+
+    def allEventOrderByDate(self):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute('SELECT * FROM EVENT ORDER BY start_time')
+            event = _cursor.fetchall()
+            _cursor.close()
+            str = self.formatResult(event)
+            return str
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting {}', format(err))
+            exit(0)
+
+    def formatResult(self, results):
+        str = '|' + 'ID'.ljust(5) + '|' + 'Start Date'.ljust(20) + '|' + 'Location'.ljust(20) + '|' + 'Organizer'.ljust(
+            10) + '|' + 'Alarms Count'.ljust(14) + '|' + 'Summary'.ljust(50) + '|\n'
+        for value in results:
+            str = str + ("|" + "{}".format(value[0]).ljust(5) + "|" + "{:%Y-%m-%d %H:%m:%S}".format(
+                value[2]).ljust(20) + "|" + "{}".format(value[3]).ljust(20) + "|" + "{}".format(
+                value[4]).ljust(10) + "|" + "{}".format(value[5]).ljust(14) + "|" + "{}".format(value[1]).ljust(
+                50) + "|\n")
+        return str
+
 # 'mysql+mysqlconnector://' + USR + ':' + PWD + '@131.104.48.64:3306/' + USR
