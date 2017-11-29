@@ -2,7 +2,7 @@
 from tkinter.messagebox import *
 from tkinter.simpledialog import *
 from tkinter.ttk import Treeview
-from bin.iCalGUIPro.business import HelpMethod
+from ..business import HelpMethod
 
 
 class QueryWindow(Tk):
