@@ -1,14 +1,17 @@
-How to complier:
-1. cd assign3
+How to build:
+1. cd assign4
 2. use command 'make' to create the .so file
-3. run GUI by command: python3 bin/A3main.py
+3. run GUI by command: python3 bin/A4main.py
+4. read the file in bin folder: A4demo.ics
 attention: all command run at folder assign3, not go into any other folder, thank you so much.
 
-Function:
-delete event function work, access by right click need deleted event in file view panel
-show alarms and show optional event also can be access by right click menu.
+A4demo.ics:
+Location can input value A and C
+Organizer name can input value AAA and CCC
+Alarms number can input value 1,2 and 3
 
+Thank you for your help through this semester.
 
 Chenxingyu Chen
 0951136
-CIS2750 A3
+CIS2750 A4

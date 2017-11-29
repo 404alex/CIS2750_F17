@@ -24,7 +24,7 @@ class dbOperation():
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
                 pass
             else:
-                print('Something wrong {}', format(err))
+                print('Something wrong: {}'.format(err))
                 _cursor.close()
                 self._conn.close()
                 exit(0)
@@ -38,7 +38,7 @@ class dbOperation():
             if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
                 pass
             else:
-                print('Something wrong {}', format(err))
+                print('Something wrong: {}'.format(err))
                 _cursor.close()
                 self._conn.close()
                 exit(0)
@@ -58,7 +58,7 @@ class dbOperation():
             _cursor.close()
             return id
         except mysql.connector.Error as err:
-            print('Something wrong, exiting {}', format(err))
+            print('Something wrong, exiting :{}'.format(err))
             exit(0)
 
     def saveEvent(self, str):
@@ -70,7 +70,7 @@ class dbOperation():
             self._conn.commit()
             return 'Insert Success\n'
         except mysql.connector.Error as err:
-            print('Something wrong, exiting {}', format(err))
+            print('Something wrong, exiting: {}'.format(err))
             exit(0)
 
     def deleteAllData(self):
@@ -83,7 +83,7 @@ class dbOperation():
             stat = self.status()
             return 'Delete Success\n' + stat
         except mysql.connector.Error as err:
-            print('Something wrong, exiting {}', format(err))
+            print('Something wrong, exiting: {}'.format(err))
             exit(0)
 
     def closeConnection(self):
@@ -99,7 +99,7 @@ class dbOperation():
             _cursor.close()
             return 'Database has ' + str(orgRowCount) + ' organizers and ' + str(eventRowCount) + ' events\n'
         except mysql.connector.Error as err:
-            print('Something wrong, exiting {}', format(err))
+            print('Something wrong, exiting: {}'.format(err))
             exit(0)
 
     def allEventOrderByDate(self):
@@ -108,20 +108,122 @@ class dbOperation():
             _cursor.execute('SELECT * FROM EVENT ORDER BY start_time')
             event = _cursor.fetchall()
             _cursor.close()
-            str = self.formatResult(event)
-            return str
+            string = self.formatResult(event)
+            return string
         except mysql.connector.Error as err:
-            print('Something wrong, exiting {}', format(err))
+            print('Something wrong, exiting: {}'.format(err))
+            exit(0)
+
+    def getEventByOrgName(self, string):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute("SELECT * FROM ORGANIZER WHERE name = '" + string + "'")
+            orgs = _cursor.fetchall()
+            string = []
+            for org in orgs:
+                _cursor.execute("SELECT * FROM EVENT WHERE organizer = '" + str(org[0]) + "'")
+                a = _cursor.fetchall()
+                a[0] = a[0] + org
+                string = string + a
+            _cursor.close()
+            string = self.formatOrgResult(string)
+            return string
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting: {}'.format(err))
+            exit(0)
+
+    def getEventByLocation(self, string):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute("SELECT * FROM EVENT WHERE location = '" + string + "'")
+            event = _cursor.fetchall()
+            _cursor.close()
+            string = self.formatResult(event)
+            return string
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting: {}'.format(err))
+            exit(0)
+
+    def getEventByAlarm(self, string):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute("SELECT * FROM EVENT WHERE num_alarms= '" + string + "'")
+            event = _cursor.fetchall()
+            _cursor.close()
+            string = self.formatResult(event)
+            return string
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting: {}'.format(err))
+            exit(0)
+
+    def getEventByUser(self, string):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute(string)
+            event = _cursor.fetchall()
+            _cursor.close()
+            string = self.formatByUser(event)
+            return string
+        except mysql.connector.Error as errorcode:
+            return 'Something wrong: {}\n\n'.format(errorcode)
+
+    def getContactInfoByOrg(self, string):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute("SELECT * FROM ORGANIZER WHERE name = '" + string + "'")
+            event = _cursor.fetchall()
+            _cursor.close()
+            string = self.formatContactInfo(event)
+            return string
+        except mysql.connector.Error as err:
+            print('Something wrong, exiting: {}'.format(err))
             exit(0)
 
     def formatResult(self, results):
-        str = '|' + 'ID'.ljust(5) + '|' + 'Start Date'.ljust(20) + '|' + 'Location'.ljust(20) + '|' + 'Organizer'.ljust(
-            10) + '|' + 'Alarms Count'.ljust(14) + '|' + 'Summary'.ljust(50) + '|\n'
+        if len(results) == 0:
+            return 'Nonthing found\n\n\n'
+        str = '|' + 'ID'.ljust(4) + '|' + 'Start Date'.ljust(20) + '|' + 'Location'.ljust(20) + '|' + 'Organizer'.ljust(
+            15) + '|' + 'Alarms Count'.ljust(14) + '|' + 'Summary'.ljust(50) + '|\n'
         for value in results:
-            str = str + ("|" + "{}".format(value[0]).ljust(5) + "|" + "{:%Y-%m-%d %H:%m:%S}".format(
+            str = str + ("|" + "{}".format(value[0]).ljust(4) + "|" + "{:%Y-%m-%d %H:%m:%S}".format(
                 value[2]).ljust(20) + "|" + "{}".format(value[3]).ljust(20) + "|" + "{}".format(
-                value[4]).ljust(10) + "|" + "{}".format(value[5]).ljust(14) + "|" + "{}".format(value[1]).ljust(
+                value[4]).ljust(15) + "|" + "{}".format(value[5]).ljust(14) + "|" + "{}".format(value[1]).ljust(
                 50) + "|\n")
+        str = str + '\n\n'
         return str
+
+    def formatOrgResult(self, results):
+        if len(results) == 0:
+            return 'Nonthing found\n\n\n'
+        str = '|' + 'ID'.ljust(4) + '|' + 'Start Date'.ljust(20) + '|' + 'Location'.ljust(20) + '|' + 'Organizer'.ljust(
+            15) + '|' + 'Alarms Count'.ljust(14) + '|' + 'Summary'.ljust(50) + '|\n'
+        for value in results:
+            str = str + ("|" + "{}".format(value[0]).ljust(4) + "|" + "{:%Y-%m-%d %H:%m:%S}".format(
+                value[2]).ljust(20) + "|" + "{}".format(value[3]).ljust(20) + "|" + "{}".format(
+                value[7]).ljust(15) + "|" + "{}".format(value[5]).ljust(14) + "|" + "{}".format(value[1]).ljust(
+                50) + "|\n")
+        str = str + '\n\n'
+        return str
+
+    def formatContactInfo(self, results):
+        if len(results) == 0:
+            return 'Nonthing found\n\n\n'
+        str = '|' + 'Name'.ljust(20) + '|' + 'Contact Info'.ljust(50) + '|\n'
+        for value in results:
+            str = str + ("|" + "{}".format(value[1]).ljust(20) + "|" + "{}".format(
+                value[2]).ljust(50) + "|\n")
+        str = str + '\n\n'
+        return str
+
+    def formatByUser(self, results):
+        if len(results) == 0:
+            return 'Nonthing found\n\n\n'
+        string = ''
+        for value in results:
+            for re in value:
+                string = string + str(re) + '\t\t'
+            string = string + '\n'
+        string = string + '\n\n\n'
+        return string
 
 # 'mysql+mysqlconnector://' + USR + ':' + PWD + '@131.104.48.64:3306/' + USR
