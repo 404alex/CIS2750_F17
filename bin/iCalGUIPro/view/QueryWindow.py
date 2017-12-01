@@ -3,6 +3,7 @@ from tkinter.messagebox import *
 from tkinter.simpledialog import *
 from tkinter.ttk import Treeview
 from ..business import HelpMethod
+from . import QueryHelpWindow
 
 
 class QueryWindow(Tk):
@@ -102,9 +103,8 @@ class QueryWindow(Tk):
             args[0].logInfoText(args[0]._dbContext.getEventByUser(args[0].queryByUser.get()))
 
     def helpOnClick(*args):
-        showinfo('Info about query',
-                 'Table Name: EVENT with column: \nevent_id,summary,start_time,\nlocation,organizer,num_alarms\nTable '
-                 'Name: ORGANIZER with column: org_id,name,contact',parent=args[0])
+        string = args[0]._dbContext.helpButton()
+        QueryHelpWindow.dialog(string)
 
     def makeLogPanel(self):
         panel = Frame(self)

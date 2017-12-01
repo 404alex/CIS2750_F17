@@ -167,6 +167,26 @@ class dbOperation():
         except mysql.connector.Error as errorcode:
             return 'Something wrong: {}\n\n'.format(errorcode)
 
+    def helpButton(self):
+        try:
+            _cursor = self._conn.cursor(buffered=True)
+            _cursor.execute("DESCRIBE ORGANIZER")
+            event = []
+            a = []
+            a.append("Table Name: ORGANIZER")
+            event.append(a)
+            event = event + _cursor.fetchall()
+            _cursor.execute("DESCRIBE EVENT")
+            b=[]
+            b.append("Table Name: EVENT")
+            event.append(b)
+            event = event + _cursor.fetchall()
+            _cursor.close()
+            string = self.formatDes(event)
+            return string
+        except mysql.connector.Error as errorcode:
+            return 'Something wrong: {}\n\n'.format(errorcode)
+
     def getContactInfoByOrg(self, string):
         try:
             _cursor = self._conn.cursor(buffered=True)
@@ -224,6 +244,16 @@ class dbOperation():
                 string = string + str(re) + '\t\t'
             string = string + '\n'
         string = string + '\n\n\n'
+        return string
+
+    def formatDes(self, result):
+        if (len(result) == 0):
+            return 'Nothing found\n\n\n'
+        string = ''
+        for value in result:
+            for re in value:
+                string = string + "|" + str(re).ljust(20)
+            string = string + '\n'
         return string
 
 # 'mysql+mysqlconnector://' + USR + ':' + PWD + '@131.104.48.64:3306/' + USR
